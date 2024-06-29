@@ -10,8 +10,48 @@ import dotenv from 'dotenv';
 import { generateAccessToken } from '../lib/utilts/generate-jwt-token';
 import { IUserJWT } from '../lib/types/user-jwt';
 
+// PostgresSQL client
+import db from '../db.postgres/index';
+// .env
 dotenv.config();
+// Express router for all app
 export const authRouter = express.Router();
+
+authRouter.post(
+  '/api/v1/postgres/registration',
+  check('email', 'E-mail cannot be empty and must be as string').trim().notEmpty().isString(),
+  check('password', 'Password must be more 4 symbols and not over 15 symbols').trim().isLength({ min: 4, max: 15 }),
+  async (req: Request, res: Response) => {
+    // Check error on validate query
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ message: 'Error on reg' });
+    }
+
+    const { email, password } = req.body;
+
+    const queryCheck = {
+      text: 'SELECT email FROM users WHERE email = $1',
+      values: [email],
+    };
+
+    const checkUsers = await db.query(queryCheck.text, queryCheck.values);
+
+    if (checkUsers.rows.length > 0) {
+      res.json('Email already exist');
+    }
+
+    const hashPassword = hashSync(password, 7);
+
+    const queryNewUser = {
+      text: 'INSERT INTO users (email, password, updated_at, created_at) VALUES ($1, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)',
+      values: [email, hashPassword],
+    };
+
+    const newUser = await db.query(queryNewUser.text, queryNewUser.values);
+    res.status(200).send('User was create successful');
+  },
+);
 
 /**
  * Регистрация пользователя

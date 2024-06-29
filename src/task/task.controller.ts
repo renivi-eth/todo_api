@@ -2,6 +2,8 @@ import { TaskModel } from './task.model';
 import express, { NextFunction, Request, Response } from 'express';
 import { check, validationResult } from 'express-validator';
 
+import db from '../db.postgres/index';
+
 // types / interfaces / utilts
 import { SortDirection } from '../lib/variables/sort-direction';
 import { UserState } from '../lib/variables/user-state';
@@ -19,6 +21,26 @@ export const router = express.Router();
 /**
  * Get all tasks or tasks with filters or sorts (GET method);
  */
+router.get(
+  '/api/v1/postgres/tasks',
+  check('completed', 'completed must be boolean value').optional().trim().notEmpty().isBoolean(),
+  check('sort', `sort must be string`).optional().trim().isString(),
+  check('state', 'state must be backlog, in-progress or done')
+    .optional()
+    .trim()
+    .notEmpty()
+    .isString()
+    .isIn(['backlog', 'in-progress', 'done']),
+  check('page', 'page must be number').optional().trim(),
+  check('limit', 'limit must be number').optional().trim().isNumeric(),
+  // @ts-ignore
+  authMiddleware,
+  async (req: Request & { user: IUserJWT }, res: Response) => {
+    
+  }
+);
+
+
 router.get(
   '/api/tasks',
   check('completed', 'completed must be boolean value').optional().trim().notEmpty().isBoolean(),
@@ -313,3 +335,9 @@ router.delete(
     // only if roles === admin
   },
 );
+
+// router.get('/api/postgres/tasks', async (req: Request, res: Response) => {
+//   const { name, description, state } = req.body;
+//   const newTask = await db.query('SELECT * FROM TASKS');
+//   res.json(newTask.rows[0]);
+// });
