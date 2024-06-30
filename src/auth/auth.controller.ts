@@ -5,20 +5,21 @@ import express, { Request, Response } from 'express';
 import { hashSync, compareSync } from 'bcrypt-ts';
 import { check, validationResult } from 'express-validator';
 import dotenv from 'dotenv';
+import db from '../lib/db/db';
 
 // types / interfaces / utilts
 import { generateAccessToken } from '../lib/utilts/generate-jwt-token';
 import { IUserJWT } from '../lib/types/user-jwt';
 
+// Инициализация переменных окружения
 dotenv.config();
+// Роутер
 export const authRouter = express.Router();
 
-/**
- * Регистрация пользователя
- */
+// Reg new user
 authRouter.post(
-  '/api/auth/registration',
-  check('username', 'username cannot be empty ').trim().notEmpty().isString(),
+  '/api/v1/auth/postgres/registration',
+  check('email', 'Email cannot be empty').trim().notEmpty().isString().isEmail(),
   check('password', 'Password must be more 4 symbols and not over 15 symbols').trim().isLength({ min: 4, max: 15 }),
   async (req: Request, res: Response) => {
     // Errors on validate query;
@@ -27,43 +28,35 @@ authRouter.post(
       return res.status(400).json({ message: `Error on registration` });
     }
 
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    const isUser = await UserModel.findOne({ username })
-      .then((user) => Boolean(user))
-      .catch((error) => {
-        res.status(400).send(error);
-        return null;
-      });
+    const queryCheckUser = {
+      text: 'SELECT id FROM users WHERE email = $1',
+      values: [email],
+    };
 
-    if (isUser) {
-      return res.status(400).json({ message: 'Username already exist' });
+    const userCheck = await db.query(queryCheckUser);
+
+    if (userCheck.rows.length > 0) {
+      return res.status(409).send('User with it email already exist');
     }
 
-    const UserRole = await RoleModel.findOne({ value: 'user' });
-
     const hashPassword = hashSync(password, 7);
-    const user = new UserModel({ username, password: hashPassword, roles: [UserRole?.value] });
 
-    await user.save().catch((error) => {
-      res.status(400).send(error);
-      return null;
-    });
+    const queryNewUser = {
+      text: 'INSERT INTO users(email, password) VALUES ($1,$2) RETURNING *',
+      values: [email, hashPassword],
+    };
 
-    return res.status(201).json({ message: 'User was create succesfull' });
+    const newUser = await db.query(queryNewUser);
+    return res.status(201).send(`User with ${email} was create successful`);
   },
 );
 
-/**
- * Аутентификация пользователя
- */
-
+// Auth user
 authRouter.post(
-  '/api/auth/login',
-  check('username', 'Username must be not empty, more 5 and not over 30 symbols')
-    .notEmpty()
-    .isLength({ min: 1, max: 30 })
-    .trim(),
+  '/api/v1/auth/postgres/login',
+  check('email', 'Email cannot be empty').trim().notEmpty().isString().isEmail(),
   check('password', 'Password must be not empty, min 5 and not over 30 symbols').notEmpty(),
   async (req: Request, res: Response) => {
     // Errors on validate query;
@@ -72,38 +65,33 @@ authRouter.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    const user = await UserModel.findOne({ username }).catch((error) => {
-      res.status(500).send(error);
-      return null;
-    });
+    const queryFindUser = {
+      text: 'SELECT (id, email, password) FROM users WHERE email = $1',
+      values: [email],
+    };
 
-    if (!user) {
-      return res.status(400).json(`User with ${username} not found`);
-    }
+    
 
-    const validPassword = compareSync(password, user.password);
+    const findUser = await db.query(queryFindUser);
+     if (findUser.rows.length === 0) {
+       return res.status(409).send('User with it email not found');
+     }
+     
+    const infoUsers = findUser.rows[0].row.replace(/^\(|\)$/g, '').split(',');
+
+    const userID = infoUsers[0];
+    const userEmail = infoUsers[1];
+
+   
+
+    const validPassword = compareSync(password, infoUsers[2]);
     if (!validPassword) {
-      return res.status(400).json(`Password is not correct`);
+      return res.status(400).send('Password is nor correct');
     }
 
-    const token = generateAccessToken(user._id, user.roles);
-    res.status(201).json({ token });
+    const token = generateAccessToken(userID, userEmail);
+    return res.status(200).json({ token });
   },
 );
-
-/**
- * Получение всех пользователей, только после регистрации, с промежуточным обработчиком, который отдает нам всех пользователей (СДЕЛАН ДЛЯ ПРИМЕРА)
- */
-
-// @ts-ignore
-authRouter.get('/api/auth/users', authMiddleware, async (req: Request & { user: IUserJWT }, res: Response) => {
-  const users = await UserModel.find({}).catch((error) => res.status(500).send(error));
-  console.log(users);
-  console.log(req.user);
-  if (!req.user.role.includes('user')) {
-    return res.status(403).send('Access denied');
-  }
-  res.status(200).send(users);
-});
