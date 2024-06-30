@@ -1,3 +1,5 @@
+create type task_state as enum ('backlog', 'in-progress', 'done');
+
 create table users
 (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
