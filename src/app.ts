@@ -1,5 +1,4 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { router } from './task/task.controller';
 import { routerTags } from './tags/tags.controller';
@@ -10,7 +9,7 @@ import db from './lib/db/db';
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT ?? 3000;
+const port = process.env.APP_PORT ?? 3000;
 
 // Подключение к PostgresSQL
 db.query('SELECT NOW()')
@@ -27,7 +26,7 @@ app.use(express.json());
 // Роутеры
 app.use(router);
 app.use(routerTags);
-app.use(authRouter);
+app.use('/api/v1/auth', authRouter);
 
 // Обработка ошибок
 app.use((req, res) => {

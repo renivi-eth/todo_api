@@ -4,7 +4,6 @@ import express, { Request, Response } from 'express';
 import { check, validationResult } from 'express-validator';
 import db from '../lib/db/db';
 
-// types / interfaces / utilts
 import { generateAccessToken } from '../lib/utilts/generate-jwt-token';
 
 // Инициализация переменных окружения
@@ -15,8 +14,10 @@ export const authRouter = express.Router();
 // Reg new user
 authRouter.post(
   '/api/v1/auth/postgres/registration',
-  check('email', 'Email cannot be empty').trim().notEmpty().isString().isEmail(),
+
+  check('email', 'Email cannot be empty').trim().isEmail(),
   check('password', 'Password must be more 4 symbols and not over 15 symbols').trim().isLength({ min: 4, max: 15 }),
+
   async (req: Request, res: Response) => {
     // Errors on validate query;
     const errors = validationResult(req);
@@ -26,14 +27,11 @@ authRouter.post(
 
     const { email, password } = req.body;
 
-    const queryCheckUser = {
-      text: 'SELECT id FROM users WHERE email = $1',
-      values: [email],
-    };
+    const {
+      rows: [user],
+    } = await db.query('SELECT id FROM users WHERE email = $1', [email]);
 
-    const userCheck = await db.query(queryCheckUser);
-
-    if (userCheck.rows.length > 0) {
+    if (user) {
       return res.status(409).send('User with it email already exist');
     }
 
@@ -51,9 +49,11 @@ authRouter.post(
 
 // Auth user
 authRouter.post(
-  '/api/v1/auth/postgres/login',
+  '/postgres/login',
+
   check('email', 'Email cannot be empty').trim().notEmpty().isString().isEmail(),
   check('password', 'Password must be not empty, min 5 and not over 30 symbols').notEmpty(),
+
   async (req: Request, res: Response) => {
     // Errors on validate query;
     const errors = validationResult(req);
@@ -68,22 +68,21 @@ authRouter.post(
       values: [email],
     };
 
-    const findUser = await db.query(queryFindUser);
-    if (findUser.rows.length === 0) {
+    const {
+      rows: [user],
+    } = await db.query(queryFindUser);
+
+    if (!user) {
       return res.status(409).send('User with it email not found');
     }
-    console.log(findUser);
-    const infoUsers = findUser.rows[0].row.replace(/^\(|\)$/g, '').split(',');
 
-    const userID = infoUsers[0];
-    const userEmail = infoUsers[1];
+    const validPassword = compareSync(password, user.password);
 
-    const validPassword = compareSync(password, infoUsers[2]);
     if (!validPassword) {
       return res.status(400).send('Password is nor correct');
     }
 
-    const token = generateAccessToken(userID, userEmail);
+    const token = generateAccessToken(user.id, user.email);
     return res.status(200).json({ token });
   },
 );
