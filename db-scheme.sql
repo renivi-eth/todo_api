@@ -1,34 +1,37 @@
-create type task_state as enum ('backlog', 'in-progress', 'done');
+CREATE TYPE task_state AS ENUM ('backlog', 'in-progress', 'done');
 
-create table users
+CREATE TABLE users
 (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    email varchar (256),
-    password text not null,
-    created_at timestamp not null default current_timestamp,
-    updated_at timestamp not null default current_timestamp
+    id         UUID PRIMARY KEY             DEFAULT gen_random_uuid(),
+    email      VARCHAR(256) UNIQUE NOT NULL,
+    password   TEXT                NOT NULL,
+    created_at TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-create table tasks (
-    id uuid primary key default gen_random_uuid(),
-    name varchar(30) not null,
-    description text,
-    state task_state not null default 'backlog',
-    user_id uuid references users(id),
-    created_at timestamp not null default current_timestamp,
-    updated_at timestamp not null default current_timestamp
+CREATE TABLE tasks
+(
+    id          UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
+    name        VARCHAR(30) NOT NULL,
+    description TEXT,
+    state       task_state  NOT NULL DEFAULT 'backlog',
+    user_id     UUID REFERENCES users (id),
+    created_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-create table tag (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    name varchar(50),
-    user_id uuid references users(id),
-    created_at timestamp not null default current_timestamp,
-    updated_at timestamp not null default current_timestamp
+CREATE TABLE tag
+(
+    id         UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
+    name       VARCHAR(50) NOT NULL,
+    user_id    UUID REFERENCES users (id),
+    created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-create table task_tag (
-    task_id uuid  references tasks(id),
-    tag_id uuid references tag(id),
-    primary key (task_id, tag_id)
+CREATE TABLE task_tag
+(
+    task_id UUID REFERENCES tasks (id),
+    tag_id  UUID REFERENCES tag (id),
+    PRIMARY KEY (task_id, tag_id)
 );

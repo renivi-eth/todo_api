@@ -1,10 +1,9 @@
 import pg from 'pg';
 import dotenv from 'dotenv';
 
-const { Pool, Client } = pg;
 dotenv.config();
 
-const db = new Pool({
+const db = new pg.Pool({
   user: 'admin',
   password: 'cXdlcnR5MTIzNDU=',
   host: 'localhost',
