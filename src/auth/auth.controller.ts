@@ -1,15 +1,11 @@
-import { RoleModel } from '../auth/role.model';
-import { UserModel } from '../auth/user.model';
-import { authMiddleware } from '../middleware/auth.middleware';
-import express, { Request, Response } from 'express';
-import { hashSync, compareSync } from 'bcrypt-ts';
-import { check, validationResult } from 'express-validator';
+import { compareSync, hashSync } from 'bcrypt-ts';
 import dotenv from 'dotenv';
+import express, { Request, Response } from 'express';
+import { check, validationResult } from 'express-validator';
 import db from '../lib/db/db';
 
 // types / interfaces / utilts
 import { generateAccessToken } from '../lib/utilts/generate-jwt-token';
-import { IUserJWT } from '../lib/types/user-jwt';
 
 // Инициализация переменных окружения
 dotenv.config();
@@ -72,19 +68,15 @@ authRouter.post(
       values: [email],
     };
 
-    
-
     const findUser = await db.query(queryFindUser);
-     if (findUser.rows.length === 0) {
-       return res.status(409).send('User with it email not found');
-     }
-     
+    if (findUser.rows.length === 0) {
+      return res.status(409).send('User with it email not found');
+    }
+    console.log(findUser);
     const infoUsers = findUser.rows[0].row.replace(/^\(|\)$/g, '').split(',');
 
     const userID = infoUsers[0];
     const userEmail = infoUsers[1];
-
-   
 
     const validPassword = compareSync(password, infoUsers[2]);
     if (!validPassword) {
