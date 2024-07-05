@@ -30,7 +30,7 @@ app.use('/api/v1/auth', authRouter);
 
 // Обработка ошибок
 app.use((req, res) => {
-  res.status(404).send('Not found');
+  res.status(404).send('Path not found');
 });
 
 // Запуск сервера

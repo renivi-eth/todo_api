@@ -4,5 +4,5 @@ export interface ICreateTask {
   name: string;
   description: string;
   tags: string;
-  state: UserState;
+  state: string;
 }
