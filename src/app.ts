@@ -3,28 +3,28 @@ import dotenv from 'dotenv';
 import { router } from './task/task.controller';
 import { routerTags } from './tags/tags.controller';
 import { authRouter } from './auth/auth.controller';
-import db from './lib/db/db';
+import db from './lib/database';
 
-// Инициализация переменных окружения
+// Enviroment var's
 dotenv.config();
 
 const app = express();
-const port = process.env.APP_PORT ?? 3000;
+const port = process.env.APP_PORT || 3030;
 
 // Подключение к PostgresSQL
 db.query('SELECT NOW()')
   .then(() => {
-    console.log('Соединение с PostgreSQL успешно установлено');
+    console.log('Connection with Postgres successful');
   })
   .catch((err) => {
-    console.error('Ошибка при подключении к PostgreSQL:', err);
+    console.error('Error with connection PostgreSQL:', err);
   });
 
 // Парсинг JSON в теле запроса. Должен быть выше роутеров
 app.use(express.json());
 
 // Роутеры
-app.use(router);
+app.use('/api/v1/', router);
 app.use(routerTags);
 app.use('/api/v1/auth', authRouter);
 

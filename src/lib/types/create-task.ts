@@ -1,9 +1,8 @@
 import { UserState } from '../variables/user-state';
 
 export interface ICreateTask {
-  title: string;
+  name: string;
   description: string;
-  completed: boolean;
-  tags: string[];
+  tags: string;
   state: UserState;
 }
