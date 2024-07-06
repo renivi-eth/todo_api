@@ -14,6 +14,8 @@ import { UserEntity } from '../lib/types/user.entity';
 dotenv.config();
 export const router = express.Router();
 
+// TODO: неправильная передача типа данных tag в бд
+
 // Get all task
 router.get(
   '/tasks',
@@ -34,7 +36,7 @@ router.get(
   authMiddleware,
 
   async (req: Request & { user: IUserJWT }, res: Response) => {
-    // TODO: бесмысленная проверка при наличии authMiddleware
+    // TODO: бесмысленная проверка при наличии authMiddleware?
     const {
       rows: [user],
     } = await db.query<UserEntity>('SELECT id FROM "user" WHERE id = $1', [req.user.id]);
@@ -43,10 +45,7 @@ router.get(
       return res.status(409).send(`User not found`);
     }
 
-    const { rows: task } = await db.query<TaskEntity>(
-      'SELECT task.*, tag.name FROM task JOIN tag ON task.user_id = tag.user_id WHERE task.user_id = $1',
-      [req.user.id],
-    );
+    const { rows: task } = await db.query<TaskEntity>('SELECT * FROM task WHERE user_id = $1', [req.user.id]);
     res.status(200).send(task);
   },
 );
@@ -55,7 +54,7 @@ router.get(
 router.post(
   '/task',
 
-  body('name', 'Title is required or must be min 3 and max 300 symbols')
+  body('name', 'Name is required or must be min 3 and max 300 symbols')
     .isString()
     .isLength({ min: 3, max: 300 })
     .notEmpty(),
@@ -101,7 +100,6 @@ router.post(
 );
 
 // Get task by ID
-
 router.get(
   '/task/:id',
 
@@ -118,15 +116,85 @@ router.get(
 
     const {
       rows: [task],
-    } = await db.query(
-      'SELECT task.*, tag.name FROM task JOIN tag ON task.user_id = tag.user_id WHERE task.user_id = $1 AND task.id = $2',
-      [req.user.id, id],
-    );
+    } = await db.query('SELECT * FROM task WHERE user_id = $1 AND id = $2', [req.user.id, id]);
 
     if (!task) {
       res.status(404).send(`Task by ${id} not found`);
     }
 
     res.status(200).send(task);
+  },
+);
+
+router.put(
+  '/task/:id',
+
+  param('id', 'ID must be UUID').trim().notEmpty().isUUID(),
+  body('name', 'Name is required or must be min 3 and max 300 symbols')
+    .isString()
+    .isLength({ min: 3, max: 300 })
+    .notEmpty(),
+  body('description', 'Field description must be a string and max 1000 symbols')
+    .optional()
+    .isLength({ min: 0, max: 1000 })
+    .isString(),
+  body('completed', 'Completed must be boolean value').optional().trim().notEmpty().isBoolean(),
+  body('tags', 'Tags must be array').optional().isArray({ min: 0, max: 30 }),
+  body('state', 'State must be only backlog, in-progress or done')
+    .optional()
+    .notEmpty()
+    .isString()
+    .isIn(['backlog', 'in-progress', 'done']),
+
+  validateQuery,
+
+  // @ts-ignore
+  authMiddleware,
+
+  // @ts-ignore
+  async (req: Request<ICreateTask> & { user: IUserJWT }, res: Response) => {
+    const id = req.params.id;
+    const { name, description, state } = req.body;
+    const userId = req.user.id;
+
+    const {
+      rows: [task],
+    } = await db.query(
+      'UPDATE task SET name = $1, description = $2, state = $3, updated_at = NOW() WHERE id = $4 AND user_id = $5 RETURNING *',
+      [name, description, state, id, userId],
+    );
+
+    if (!task) {
+      res.status(400).send('Task not found or not authorized to delete this task!');
+    }
+
+    res.status(201).send(task);
+  },
+);
+
+router.delete(
+  '/task/:id',
+
+  param('id').trim().notEmpty().isUUID(),
+
+  validateQuery,
+
+  // @ts-ignore
+  authMiddleware,
+
+  // @ts-ignore
+  async (req: Request<ICreateTask> & { user: IUserJWT }, res: Response) => {
+    const id = req.params.id;
+    const userId = req.user.id;
+
+    console.log(id, userId);
+    const {
+      rows: [task],
+    } = await db.query('DELETE FROM task WHERE id = $1 AND user_id = $2 RETURNING *', [id, userId]);
+
+    if (!task) {
+      res.status(404).send('Task not found or not authorized to delete this task');
+    }
+    return res.status(200).send(task);
   },
 );

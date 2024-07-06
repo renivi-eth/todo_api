@@ -31,7 +31,7 @@ CREATE TABLE tag
 
 CREATE TABLE task_tag
 (
-    task_id UUID REFERENCES task (id),
-    tag_id  UUID REFERENCES tag (id),
+    task_id UUID REFERENCES task (id) ON DELETE CASCADE,
+    tag_id  UUID REFERENCES tag (id)  ON DELETE CASCADE,
     PRIMARY KEY (task_id, tag_id)
 );
