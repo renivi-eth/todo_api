@@ -25,7 +25,7 @@ app.use(express.json());
 
 // Роутеры
 app.use('/api/v1/', router);
-app.use(routerTags);
+app.use('/api/v1/', routerTags);
 app.use('/api/v1/auth', authRouter);
 
 // Обработка ошибок
