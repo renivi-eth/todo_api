@@ -42,7 +42,7 @@ routerTags.get(
 routerTags.post(
   '/tags/:id',
 
-  body('tags', 'Tags must be only backlog, in-progress or done').isIn(['backlog', 'in-progress', 'done']),
+  body('tags', 'Tags must be an array with string values or not empty').notEmpty().isArray(),
 
   validateQuery,
 
@@ -57,10 +57,14 @@ routerTags.post(
     const {
       rows: [tags],
     } = await db.query<TagsEntity>(
-      'SELECT task_id, name FROM task_tag JOIN tag ON task_tag.tag_id = tag.id  WHERE task_id = $1 AND user_id = $2',
+      'SELECT task_id, name FROM task_tag JOIN tag ON task_tag.tag_id = tag.id WHERE task_id = $1 AND user_id = $2',
       [id, userId],
     );
 
+    console.log(tags);
+
+    const uniqTags = [...new Set(tag)];
     
+
   },
 );
