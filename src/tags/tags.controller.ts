@@ -1,11 +1,11 @@
 import express, { Request, Response } from 'express';
-import { check, param, validationResult } from 'express-validator';
+import { param } from 'express-validator';
 import { IUserJWT } from '../lib/types/user-jwt';
-import { removeDublicate } from '../lib/utilts/remove-dublicate';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { validateQuery } from '../middleware/validatequery.middleware';
 
 import db from '../lib/database';
+import { TagsEntity } from '../lib/types/tags.entity';
 
 export const routerTags = express.Router();
 
@@ -24,10 +24,14 @@ routerTags.get(
 
     const {
       rows: [tags],
-    } = await db.query(
+    } = await db.query<TagsEntity>(
       'SELECT * FROM task_tag JOIN tag ON task_tag.tag_id = tag.id WHERE task_id = $1 AND user_id = $2',
       [id, userId],
     );
+
+    if (!tags) {
+      res.status(404).send('Tags not found or not authorized');
+    }
 
     return res.status(200).send(tags.name);
   },
