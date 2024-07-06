@@ -7,6 +7,7 @@ import { ObjectId } from 'mongodb';
  */
 
 const secretJWT = process.env.SECRET_JWT as string;
+
 export const generateAccessToken = (id: string | number, email: string) => {
   const payload = {
     id,

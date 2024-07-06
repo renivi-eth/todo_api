@@ -1,11 +1,13 @@
 import express, { Request, Response } from 'express';
-import { param } from 'express-validator';
-import { IUserJWT } from '../lib/types/user-jwt';
-import { authMiddleware } from '../middleware/auth.middleware';
-import { validateQuery } from '../middleware/validatequery.middleware';
+import { body, param } from 'express-validator';
 
 import db from '../lib/database';
+
 import { TagsEntity } from '../lib/types/tags.entity';
+import { IUserJWT } from '../lib/types/user-jwt';
+
+import { authMiddleware } from '../middleware/auth.middleware';
+import { validateQuery } from '../middleware/validatequery.middleware';
 
 export const routerTags = express.Router();
 
@@ -34,5 +36,20 @@ routerTags.get(
     }
 
     return res.status(200).send(tags.name);
+  },
+);
+
+routerTags.post(
+  '/tags',
+
+  body('tags', 'Tags must be only backlog, in-progress or done').isIn(['backlog', 'in-progress', 'done']),
+
+  validateQuery,
+
+  //@ts-ignore
+  authMiddleware,
+
+  async (req: Request & { user: IUserJWT }, res: Response) => {
+    res.send(req.user);
   },
 );

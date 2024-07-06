@@ -4,6 +4,7 @@ import { router } from './task/task.controller';
 import { routerTags } from './tags/tags.controller';
 import { authRouter } from './auth/auth.controller';
 import db from './lib/database';
+import allRoutes from './routes';
 
 // Enviroment var's
 dotenv.config();
@@ -24,9 +25,7 @@ db.query('SELECT NOW()')
 app.use(express.json());
 
 // Роутеры
-app.use('/api/v1/', router);
-app.use('/api/v1/', routerTags);
-app.use('/api/v1/auth', authRouter);
+app.use(allRoutes);
 
 // Обработка ошибок
 app.use((req, res) => {
