@@ -40,7 +40,7 @@ routerTags.get(
 );
 
 routerTags.post(
-  '/tags',
+  '/tags/:id',
 
   body('tags', 'Tags must be only backlog, in-progress or done').isIn(['backlog', 'in-progress', 'done']),
 
@@ -50,6 +50,17 @@ routerTags.post(
   authMiddleware,
 
   async (req: Request & { user: IUserJWT }, res: Response) => {
-    res.send(req.user);
+    const tag = req.body.tags;
+    const id = req.params.id;
+    const userId = req.user.id;
+
+    const {
+      rows: [tags],
+    } = await db.query<TagsEntity>(
+      'SELECT task_id, name FROM task_tag JOIN tag ON task_tag.tag_id = tag.id  WHERE task_id = $1 AND user_id = $2',
+      [id, userId],
+    );
+
+    
   },
 );
