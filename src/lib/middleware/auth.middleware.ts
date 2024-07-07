@@ -1,15 +1,17 @@
-import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import { NextFunction, Response } from 'express';
 
-import { IUserJWT } from '../lib/types/user-jwt';
-import { AppRequest } from '../lib/types/app-request';
+import { IUserJWT } from '../types/user-jwt';
+import { AppRequest } from '../types/app-request';
 
-dotenv.config();
-
+/**
+ * Middleware который проверяет наличие токена в заголовке запроса и его валидность.
+ * Добавляет в тело запроса, объект user с данными пользователя.
+ */
 export const authMiddleware = (req: AppRequest, res: Response, next: NextFunction) => {
   if (req.method === 'OPTIONS') {
     next();
+    return;
   }
 
   if (!req.headers.authorization) {
@@ -18,7 +20,7 @@ export const authMiddleware = (req: AppRequest, res: Response, next: NextFunctio
   }
 
   try {
-    const token = req.headers.authorization.split(' ')[1];
+    const [, token] = req.headers.authorization.split(' ');
 
     if (!token) {
       res.status(401).send('Authorization token is required');
@@ -33,7 +35,6 @@ export const authMiddleware = (req: AppRequest, res: Response, next: NextFunctio
     }
 
     req.user = decodedData;
-    console.log(decodedData);
 
     next();
   } catch {

@@ -1,33 +1,26 @@
 import dotenv from 'dotenv';
 import express from 'express';
-import db from './lib/database';
-import allRoutes from './routes';
+import dotenv from 'dotenv';
 
-// Enviroment var's
+import { router as taskRouter } from './controllers/task.controller';
+import { router as tagRouter } from './controllers/tags.controller';
+import { router as authRouter } from './controllers/auth.controller';
+
+// Загрузка переменных окружения
 dotenv.config();
 
-const app = express();
+const API_VERSION = '/api/v1/';
 const port = process.env.APP_PORT || 3030;
 
-// Подключение к PostgresSQL
-db.query('SELECT NOW()')
-  .then(() => {
-    console.log('Connection with Postgres successful');
-  })
-  .catch((err) => {
-    console.error('Error with connection PostgreSQL:', err);
-  });
+const app = express();
 
 // Парсинг JSON в теле запроса. Должен быть выше роутеров
 app.use(express.json());
 
 // Роутеры
-app.use(allRoutes);
-
-// Обработка ошибок
-app.use((req, res) => {
-  res.status(404).send('Path not found');
-});
+app.use(API_VERSION, taskRouter);
+app.use(API_VERSION, tagRouter);
+app.use(API_VERSION, authRouter);
 
 // Запуск сервера
 app.listen(port, () => {

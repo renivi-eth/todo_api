@@ -108,7 +108,9 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
-  "include": ["src/**/*", "src/app.ts", "src/middleware"],
+  "include": ["src/**/*", "src/app.ts",
+    "src/lib/middleware"
+  ],
   "exclude": ["node_modules"],
   "lib": ["esnext"],
   "ts-node": {
