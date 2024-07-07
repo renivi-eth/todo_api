@@ -35,7 +35,6 @@ export const authMiddleware = (req: AppRequest, res: Response, next: NextFunctio
     }
 
     req.user = decodedData;
-    console.log(decodedData);
 
     next();
   } catch {

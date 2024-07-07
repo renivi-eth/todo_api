@@ -16,17 +16,6 @@ export const router = express.Router();
 // Get all task
 router.get(
   '/tasks',
-  // TODO: пока без параметров работем
-  // check('completed', 'completed must be boolean value').optional().trim().notEmpty().isBoolean(),
-  // check('sort', `sort must be string`).optional().trim().isString(),
-  // check('state', 'state must be backlog, in-progress or done')
-  //   .optional()
-  //   .trim()
-  //   .notEmpty()
-  //   .isString()
-  //   .isIn(['backlog', 'in-progress', 'done']),
-  // check('page', 'page must be number').optional().trim(),
-  // check('limit', 'limit must be number').optional().trim().isNumeric(),
 
   handleReqQueryError,
 
