@@ -5,6 +5,7 @@ import { validateQuery } from '../middleware/validatequery.middleware';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { IUserJWT } from '../lib/types/user-jwt';
 import db from '../lib/database';
+import { AppRequest } from '../lib/types/app-request';
 
 import { ICreateTask } from '../lib/types/create-task';
 
@@ -34,18 +35,18 @@ router.get(
   validateQuery,
   // @ts-ignore
   authMiddleware,
-
-  async (req: Request & { user: IUserJWT }, res: Response) => {
+  // @ts-ignore
+  async (req: AppRequest, res: Response) => {
     // TODO: бесмысленная проверка при наличии authMiddleware?
     const {
       rows: [user],
-    } = await db.query<UserEntity>('SELECT id FROM "user" WHERE id = $1', [req.user.id]);
+    } = await db.query<UserEntity>('SELECT id FROM "user" WHERE id = $1', [req.user?.id]);
     console.log(user.id);
     if (!user) {
       return res.status(409).send(`User not found`);
     }
 
-    const { rows: task } = await db.query<TaskEntity>('SELECT * FROM task WHERE user_id = $1', [req.user.id]);
+    const { rows: task } = await db.query<TaskEntity>('SELECT * FROM task WHERE user_id = $1', [req.user?.id]);
     res.status(200).send(task);
   },
 );
@@ -76,9 +77,9 @@ router.post(
   // @ts-ignore
   authMiddleware,
   // @ts-ignore
-  async (req: Request<ICreateTask> & { user: IUserJWT }, res: Response) => {
+  async (req: AppRequest, res: Response) => {
     const { name, description, tags, state } = req.body;
-    const userId = req.user.id;
+    const userId = req.user?.id;
 
     const {
       rows: [task],
@@ -89,6 +90,7 @@ router.post(
 
     const uniqTags = Array.from(new Set(tags));
 
+    //TODO: удалить! тэги создаются отдельно;
     const {
       rows: [tag],
     } = await db.query<TaskEntity>('INSERT INTO tag (name, user_id) VALUES($1,$2) RETURNING *', [uniqTags, userId]);
@@ -111,7 +113,7 @@ router.get(
   authMiddleware,
 
   // @ts-ignore
-  async (req: Request<ICreateTask> & { user: IUserJWT }, res: Response) => {
+  async (req: AppRequest & { user: IUserJWT }, res: Response) => {
     const id = req.params.id;
 
     const {
@@ -152,10 +154,10 @@ router.put(
   authMiddleware,
 
   // @ts-ignore
-  async (req: Request<ICreateTask> & { user: IUserJWT }, res: Response) => {
+  async (req: AppRequest, res: Response) => {
     const id = req.params.id;
     const { name, description, state } = req.body;
-    const userId = req.user.id;
+    const userId = req.user?.id;
 
     const {
       rows: [task],
@@ -183,7 +185,7 @@ router.delete(
   authMiddleware,
 
   // @ts-ignore
-  async (req: Request<ICreateTask> & { user: IUserJWT }, res: Response) => {
+  async (req: AppRequest & { user: IUserJWT }, res: Response) => {
     const id = req.params.id;
     const userId = req.user.id;
 

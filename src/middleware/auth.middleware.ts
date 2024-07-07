@@ -18,7 +18,7 @@ export const authMiddleware = (req: AppRequest, res: Response, next: NextFunctio
   }
 
   try {
-    const [token] = req.headers.authorization.split(' ');
+    const token = req.headers.authorization.split(' ')[1];
 
     if (!token) {
       res.status(401).send('Authorization token is required');
@@ -33,6 +33,7 @@ export const authMiddleware = (req: AppRequest, res: Response, next: NextFunctio
     }
 
     req.user = decodedData;
+    console.log(decodedData);
 
     next();
   } catch {
