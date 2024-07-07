@@ -1,6 +1,4 @@
 import dotenv from 'dotenv';
-import express from 'express';
-import dotenv from 'dotenv';
 
 import { router as taskRouter } from './controllers/task.controller';
 import { router as tagRouter } from './controllers/tags.controller';
