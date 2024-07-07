@@ -1,8 +1,5 @@
-import express from 'express';
 import dotenv from 'dotenv';
-import { router } from './task/task.controller';
-import { routerTags } from './tags/tags.controller';
-import { authRouter } from './auth/auth.controller';
+import express from 'express';
 import db from './lib/database';
 import allRoutes from './routes';
 
