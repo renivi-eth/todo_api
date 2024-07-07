@@ -7,8 +7,10 @@ import db from '../lib/database';
 import { generateAccessToken } from '../lib/utilts/generate-jwt-token';
 import { validateQuery } from '../middleware/validatequery.middleware';
 import { UserEntity } from '../lib/types/user.entity';
+
 // Enviroment variables
 dotenv.config();
+
 // Router
 export const authRouter = express.Router();
 
@@ -36,7 +38,7 @@ authRouter.post(
 
     await db.query<UserEntity>('INSERT INTO "user"(email, password) VALUES ($1,$2) RETURNING *', [email, hashPassword]);
 
-    return res.status(201).send(`User with ${email} email was create successful`);
+    return res.status(201).send(`User with ${email} email was create successful!`);
   },
 );
 

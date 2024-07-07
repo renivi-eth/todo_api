@@ -15,7 +15,6 @@ import { UserEntity } from '../lib/types/user.entity';
 dotenv.config();
 export const router = express.Router();
 
-// TODO: неправильная передача типа данных tag в бд
 
 // Get all task
 router.get(
@@ -84,18 +83,9 @@ router.post(
     const {
       rows: [task],
     } = await db.query<TaskEntity>(
-      'INSERT INTO task(name, description,state, user_id) VALUES ($1, $2, $3, $4) RETURNING *',
+      'INSERT INTO task(name, description, state, user_id) VALUES ($1, $2, $3, $4) RETURNING *',
       [name, description, state, userId],
     );
-
-    const uniqTags = Array.from(new Set(tags));
-
-    //TODO: удалить! тэги создаются отдельно;
-    const {
-      rows: [tag],
-    } = await db.query<TaskEntity>('INSERT INTO tag (name, user_id) VALUES($1,$2) RETURNING *', [uniqTags, userId]);
-
-    await db.query<TaskEntity>(`INSERT INTO task_tag (task_id, tag_id) VALUES ($1, $2)`, [task.id, tag.id]);
 
     res.status(201).send(task);
   },
