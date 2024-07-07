@@ -1,17 +1,14 @@
-import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
-import { ObjectId } from 'mongodb';
 
-/** @function:
+/**
  * Создание JWT токена для доступа (полезная нагрузка + секрет + время жизни)
  */
+export const generateAccessToken = (id: string, email: string) => {
+  const SECRET_JWT = process.env.SECRET_JWT as string;
 
-const secretJWT = process.env.SECRET_JWT as string;
+  if (!SECRET_JWT) {
+    throw new Error('Secret key for JWT not found');
+  }
 
-export const generateAccessToken = (id: string | number, email: string) => {
-  const payload = {
-    id,
-    email,
-  };
-  return jwt.sign(payload, secretJWT, { expiresIn: '10h' });
+  return jwt.sign({ id, email }, SECRET_JWT, { expiresIn: '10h' });
 };

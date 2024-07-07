@@ -1,20 +1,20 @@
 import express, { Response } from 'express';
 import { body, param } from 'express-validator';
 
-import db from '../lib/database';
+import { db } from '../database';
 import { TagsEntity } from '../lib/types/tags.entity';
 import { AppRequest } from '../lib/types/app-request';
-import { authMiddleware } from '../middleware/auth.middleware';
-import { validateQuery } from '../middleware/validatequery.middleware';
+import { authMiddleware } from '../lib/middleware/auth.middleware';
+import { handleReqQueryError } from '../lib/middleware/validate-query.middleware';
 
-export const routerTags = express.Router();
+export const router = express.Router();
 
-routerTags.get(
+router.get(
   '/tags/:id',
 
   param('id', 'ID must be UUID').trim().notEmpty().isUUID(),
 
-  validateQuery,
+  handleReqQueryError,
 
   authMiddleware,
 
@@ -41,12 +41,12 @@ routerTags.get(
   },
 );
 
-routerTags.post(
+router.post(
   '/tags/:id',
 
   body('tags', 'Tags must be an array with string values or not empty').notEmpty().isArray(),
 
-  validateQuery,
+  handleReqQueryError,
 
   //@ts-ignore
   authMiddleware,
@@ -89,7 +89,7 @@ routerTags.post(
   },
 );
 
-routerTags.put(
+router.put(
   '/tags/:id',
 
   param('id', 'ID must be UUID').trim().notEmpty().isUUID(),
@@ -109,7 +109,7 @@ routerTags.put(
     .isString()
     .isIn(['backlog', 'in-progress', 'done']),
 
-  validateQuery,
+  handleReqQueryError,
 
   // @ts-ignore
   authMiddleware,

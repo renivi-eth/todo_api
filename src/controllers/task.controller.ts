@@ -1,20 +1,17 @@
-import express from 'express';
+import express, { Response } from 'express';
 import { body, check, param, validationResult } from 'express-validator';
 import dotenv from 'dotenv';
-import { validateQuery } from '../middleware/validatequery.middleware';
-import { authMiddleware } from '../middleware/auth.middleware';
+import { handleReqQueryError } from '../lib/middleware/validate-query.middleware';
+import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { IUserJWT } from '../lib/types/user-jwt';
-import db from '../lib/database';
+import { db } from '../database';
 import { AppRequest } from '../lib/types/app-request';
-
-import { ICreateTask } from '../lib/types/create-task';
 
 import { TaskEntity } from '../lib/types/task.entity';
 import { UserEntity } from '../lib/types/user.entity';
 
 dotenv.config();
 export const router = express.Router();
-
 
 // Get all task
 router.get(
@@ -31,10 +28,10 @@ router.get(
   // check('page', 'page must be number').optional().trim(),
   // check('limit', 'limit must be number').optional().trim().isNumeric(),
 
-  validateQuery,
-  // @ts-ignore
+  handleReqQueryError,
+
   authMiddleware,
-  // @ts-ignore
+
   async (req: AppRequest, res: Response) => {
     // TODO: бесмысленная проверка при наличии authMiddleware?
     const {
@@ -71,7 +68,7 @@ router.post(
     .isIn(['backlog', 'in-progress', 'done']),
 
   // Middleware for body Errors
-  validateQuery,
+  handleReqQueryError,
 
   // @ts-ignore
   authMiddleware,
@@ -97,7 +94,7 @@ router.get(
 
   param('id').trim().notEmpty().isUUID(),
 
-  validateQuery,
+  handleReqQueryError,
 
   // @ts-ignore
   authMiddleware,
@@ -138,7 +135,7 @@ router.put(
     .isString()
     .isIn(['backlog', 'in-progress', 'done']),
 
-  validateQuery,
+  handleReqQueryError,
 
   // @ts-ignore
   authMiddleware,
@@ -169,7 +166,7 @@ router.delete(
 
   param('id').trim().notEmpty().isUUID(),
 
-  validateQuery,
+  handleReqQueryError,
 
   // @ts-ignore
   authMiddleware,
