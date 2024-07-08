@@ -111,8 +111,33 @@ router.put(
   },
 );
 
+router.delete(
+  '/tag/:id',
+
+  authMiddleware,
+
+  param('id', 'ID must be UUID').trim().isUUID(),
+
+  handleReqQueryError,
+
+  async (req: AppRequest, res: Response) => {
+    if (!req.user) {
+      throw new Error('User not found');
+    }
+
+    const {
+      rows: [tag],
+    } = await db.query<TagEntity>('DELETE FROM tag WHERE id = $1 AND user_id = $2 RETURNING *', [
+      req.params.id,
+      req.user.id,
+    ]);
+
+    return res.status(200).send(tag);
+  },
+);
+
 // TODO: Add get tags by task - GET /tags/by-taskId/:taskId
-// TODO: Add delete tag - DELETE /tags/:id
+// TODO: Add delete tag - DELETE /tags/:id - done
 // TODO: Add delete tag from task - DELETE /tags/:id/:taskId. Проверять что это тег пользователя
 // TODO: Add add tag to task - POST /tags/to-task/:taskId
 // Подумать над неймингов путей и логике работы

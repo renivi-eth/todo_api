@@ -1,12 +1,13 @@
-import express, { Response } from 'express';
-import { body, check, param, validationResult } from 'express-validator';
 import dotenv from 'dotenv';
-import { handleReqQueryError } from '../lib/middleware/validate-query.middleware';
-import { authMiddleware } from '../lib/middleware/auth.middleware';
-import { IUserJWT } from '../lib/types/user-jwt';
-import { db } from '../database';
-import { AppRequest } from '../lib/types/app-request';
+import express, { Response } from 'express';
 
+import { db } from '../database';
+import { body, param } from 'express-validator';
+import { authMiddleware } from '../lib/middleware/auth.middleware';
+import { handleReqQueryError } from '../lib/middleware/validate-query.middleware';
+
+import { IUserJWT } from '../lib/types/user-jwt';
+import { AppRequest } from '../lib/types/app-request';
 import { TaskEntity } from '../lib/types/task.entity';
 import { UserEntity } from '../lib/types/user.entity';
 
