@@ -27,9 +27,11 @@ router.get(
 
     if (!tags) {
       res.status(404).send('Tags not found or not authorized');
+      return;
     }
 
-    return res.status(200).send(tags);
+    res.status(200).send(tags);
+    return;
   },
 );
 

@@ -11,29 +11,31 @@ import { AppRequest } from '../lib/types/app-request';
 import { TaskEntity } from '../lib/types/task.entity';
 import { UserEntity } from '../lib/types/user.entity';
 
-dotenv.config();
 export const router = express.Router();
 
 // Get all task
 router.get(
   '/tasks',
 
-  handleReqQueryError,
-
   authMiddleware,
 
+  handleReqQueryError,
+
   async (req: AppRequest, res: Response) => {
-    // TODO: бесмысленная проверка при наличии authMiddleware?
-    const {
-      rows: [user],
-    } = await db.query<UserEntity>('SELECT id FROM "user" WHERE id = $1', [req.user?.id]);
-    console.log(user.id);
-    if (!user) {
-      return res.status(409).send(`User not found`);
+    if (!req.user) {
+      throw new Error('User not found');
     }
 
-    const { rows: task } = await db.query<TaskEntity>('SELECT * FROM task WHERE user_id = $1', [req.user?.id]);
-    res.status(200).send(task);
+    const { rows: task } = await db.query<TaskEntity>('SELECT * FROM task WHERE user_id = $1', [req.user.id]);
+
+    if (task.length === 0) {
+      res.status(200).send(`User with ${req.user.email} email has not created a task yet`);
+      return;
+    }
+    {
+      res.status(200).send(task);
+      return;
+    }
   },
 );
 
