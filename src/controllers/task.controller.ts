@@ -39,71 +39,60 @@ router.get(
   },
 );
 
-// Create Task
-router.post(
-  '/task',
-
-  body('name', 'Name is required or must be min 3 and max 300 symbols')
-    .isString()
-    .isLength({ min: 3, max: 300 })
-    .notEmpty(),
-  body('description', 'Field description must be a string and max 1000 symbols')
-    .optional()
-    .isLength({ min: 0, max: 1000 })
-    .isString(),
-  body('completed', 'Completed must be boolean value').optional().trim().notEmpty().isBoolean(),
-  body('tags', 'Tags must be array').optional().isArray({ min: 0, max: 30 }),
-  body('state', 'State must be only backlog, in-progress or done')
-    .optional()
-    .notEmpty()
-    .isString()
-    .isIn(['backlog', 'in-progress', 'done']),
-
-  // Middleware for body Errors
-  handleReqQueryError,
-
-  // @ts-ignore
-  authMiddleware,
-  // @ts-ignore
-  async (req: AppRequest, res: Response) => {
-    const { name, description, tags, state } = req.body;
-    const userId = req.user?.id;
-
-    const {
-      rows: [task],
-    } = await db.query<TaskEntity>(
-      'INSERT INTO task(name, description, state, user_id) VALUES ($1, $2, $3, $4) RETURNING *',
-      [name, description, state, userId],
-    );
-
-    res.status(201).send(task);
-  },
-);
-
 // Get task by ID
 router.get(
   '/task/:id',
+
+  authMiddleware,
 
   param('id').trim().notEmpty().isUUID(),
 
   handleReqQueryError,
 
-  // @ts-ignore
-  authMiddleware,
-
-  // @ts-ignore
-  async (req: AppRequest & { user: IUserJWT }, res: Response) => {
-    const id = req.params.id;
+  async (req: AppRequest, res: Response) => {
+    if (!req.user) {
+      throw new Error('User not found');
+    }
 
     const {
       rows: [task],
-    } = await db.query('SELECT * FROM task WHERE user_id = $1 AND id = $2', [req.user.id, id]);
+    } = await db.query('SELECT * FROM task WHERE user_id = $1 AND id = $2', [req.user.id, req.params.id]);
 
     if (!task) {
-      res.status(404).send(`Task by ${id} not found`);
+      return res.status(404).send(`Task by ${req.params.id} id not found`);
     }
 
-    res.status(200).send(task);
+    return res.status(200).send(task);
+  },
+);
+
+// Create Task
+router.post(
+  '/task',
+
+  authMiddleware,
+  // TODO: вынести все отдельно; 
+  body('name', 'Name must be a string').isString().isString().trim().isLength({ min: 0, max: 30 }),
+  body('description', 'Description must be a text').isString().trim(),
+  body('state', 'State must be only backlog, in-progress or done').isIn(['backlog', 'in-progress', 'done']),
+
+  handleReqQueryError,
+
+  async (req: AppRequest, res: Response) => {
+    if (!req.user) {
+      throw new Error('User not found');
+    }
+
+    const { name, description, state } = req.body;
+
+    const {
+      rows: [task],
+    } = await db.query<TaskEntity>(
+      'INSERT INTO task(name, description, state, user_id) VALUES ($1, $2, $3, $4) RETURNING *',
+      [name, description, state, req.user.id],
+    );
+
+    return res.status(201).send(task);
   },
 );
 

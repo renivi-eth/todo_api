@@ -54,7 +54,7 @@ router.get(
     } = await db.query<TagEntity>('SELECT * FROM tag WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
 
     if (!tag) {
-      res.status(404).send('Tags not found or not authorized');
+      return res.status(404).send(`Tags by ${req.params.id} id not found`);
     }
 
     return res.status(200).send(tag);
@@ -143,3 +143,5 @@ router.delete(
 // TODO: Add delete tag from task - DELETE /tags/:id/:taskId. Проверять что это тег пользователя
 // TODO: Add add tag to task - POST /tags/to-task/:taskId
 // Подумать над неймингов путей и логике работы
+
+// TODO: вынести все проверки на начилие в req user в отдельную функцию;
