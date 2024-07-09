@@ -1,19 +1,21 @@
-import dotenv from 'dotenv';
 import express, { Response } from 'express';
+import { body, param, ValidationChain } from 'express-validator';
 
 import { db } from '../database';
-import { body, param } from 'express-validator';
+import { AppRequest } from '../lib/types/app-request';
+import { TaskEntity } from '../lib/types/task.entity';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/validate-query.middleware';
 
-import { IUserJWT } from '../lib/types/user-jwt';
-import { AppRequest } from '../lib/types/app-request';
-import { TaskEntity } from '../lib/types/task.entity';
-import { UserEntity } from '../lib/types/user.entity';
-
 export const router = express.Router();
 
-// Get all task
+const bodyTaskCheck: ValidationChain[] = [
+  body('name', 'Name must be a string').isString().isString().trim().isLength({ min: 0, max: 30 }),
+  body('description', 'Description must be a text').isString().trim(),
+  body('state', 'State must be only backlog, in-progress or done').isIn(['backlog', 'in-progress', 'done']),
+];
+
+// GET - ALL TASK
 router.get(
   '/tasks',
 
@@ -29,17 +31,15 @@ router.get(
     const { rows: task } = await db.query<TaskEntity>('SELECT * FROM task WHERE user_id = $1', [req.user.id]);
 
     if (task.length === 0) {
-      res.status(200).send(`User with ${req.user.email} email has not created a task yet`);
-      return;
+      return res.status(200).send(`User with ${req.user.email} email has not created a task yet`);
     }
     {
-      res.status(200).send(task);
-      return;
+      return res.status(200).send(task);
     }
   },
 );
 
-// Get task by ID
+// GET - GET TASK BY ID
 router.get(
   '/task/:id',
 
@@ -66,15 +66,13 @@ router.get(
   },
 );
 
-// Create Task
+// POST - CREATE TASK
 router.post(
   '/task',
 
   authMiddleware,
-  // TODO: вынести все отдельно;
-  body('name', 'Name must be a string').isString().isString().trim().isLength({ min: 0, max: 30 }),
-  body('description', 'Description must be a text').isString().trim(),
-  body('state', 'State must be only backlog, in-progress or done').isIn(['backlog', 'in-progress', 'done']),
+
+  ...bodyTaskCheck,
 
   handleReqQueryError,
 
