@@ -128,7 +128,7 @@ router.delete(
     }
 
     const {
-      rows: [tag],
+      rows: [tag]
     } = await db.query<TagEntity>('DELETE FROM tag WHERE id = $1 AND user_id = $2 RETURNING *', [
       req.params.id,
       req.user.id,
@@ -138,9 +138,9 @@ router.delete(
   },
 );
 
-// TODO: Add get tags by task - GET /tags/by-taskId/:taskId
+// TODO: Add get tags by task - GET /tags/by-taskId/:taskId - done
 // TODO: Add delete tag from task - DELETE /tags/:id/:taskId. Проверять что это тег пользователя
-// TODO: Add add tag to task - POST /tags/to-task/:taskId
+// TODO: Add add tag to task - POST /tags/to-task/:taskId - done
 // Подумать над неймингов путей и логике работы
 
 // TODO: вынести все проверки на начилие в req user в отдельную функцию;
