@@ -1,9 +1,10 @@
 import express from 'express';
 import dotenv from 'dotenv';
 
-import { router as taskRouter } from './controllers/task.controller';
 import { router as tagRouter } from './controllers/tags.controller';
+import { router as taskRouter } from './controllers/task.controller';
 import { router as authRouter } from './controllers/auth.controller';
+import { router as tagsTaskRouter } from './controllers/tags-task.controller';
 
 // Загрузка переменных окружения
 dotenv.config();
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use(API_VERSION, taskRouter);
 app.use(API_VERSION, tagRouter);
 app.use(API_VERSION, authRouter);
+app.use(API_VERSION, tagsTaskRouter);
 
 // Запуск сервера
 app.listen(port, () => {
