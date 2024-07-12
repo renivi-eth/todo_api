@@ -61,8 +61,7 @@ router.post(
     } = await db.query<UserEntity>('SELECT * FROM "user" WHERE email = $1', [email]);
 
     if (!user) {
-      // TODO: Подумать над возвратом кода ошибки
-      return res.status(409).send(`User with ${email} not found`);
+      return res.status(404).send(`User with ${email} not found`);
     }
 
     const isValidPassword = await compare(password, user.password);
