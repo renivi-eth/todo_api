@@ -5,7 +5,7 @@ import { db } from '../database';
 import { TagEntity } from '../lib/types/tag.entity';
 import { AppRequest } from '../lib/types/app-request';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
-import { handleReqQueryError } from '../lib/middleware/validate-query.middleware';
+import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 
 export const router = express.Router();
 
@@ -128,7 +128,7 @@ router.delete(
     }
 
     const {
-      rows: [tag]
+      rows: [tag],
     } = await db.query<TagEntity>('DELETE FROM tag WHERE id = $1 AND user_id = $2 RETURNING *', [
       req.params.id,
       req.user.id,

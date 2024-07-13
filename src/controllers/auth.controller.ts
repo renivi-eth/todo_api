@@ -4,7 +4,7 @@ import express, { Request, Response } from 'express';
 
 import { db } from '../database';
 import { UserEntity } from '../lib/types/user.entity';
-import { handleReqQueryError } from '../lib/middleware/validate-query.middleware';
+import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 import { generateAccessToken } from '../lib/utilts/generate-jwt-token';
 
 export const router = express.Router();

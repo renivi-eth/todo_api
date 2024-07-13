@@ -6,7 +6,7 @@ import { TagEntity } from '../lib/types/tag.entity';
 import { AppRequest } from '../lib/types/app-request';
 import { IRelationsTaskTag } from '../lib/types/tast-tag.entity';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
-import { handleReqQueryError } from '../lib/middleware/validate-query.middleware';
+import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 
 export const router = express.Router();
 
