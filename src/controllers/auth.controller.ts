@@ -1,27 +1,26 @@
-import { body } from 'express-validator';
+import { body, ValidationChain } from 'express-validator';
 import { compare, hash } from 'bcrypt-ts';
 import express, { Request, Response } from 'express';
 
 import { db } from '../database';
 import { UserEntity } from '../lib/types/user.entity';
-import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 import { generateAccessToken } from '../lib/utilts/generate-jwt-token';
+import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 
 export const router = express.Router();
 
 const PASSWORD_SALT = 7;
 
-const emailCheck = body('email', 'Email cannot be empty').trim().isEmail();
-const passwordCheck = body('password', 'Password must be more 4 symbols and not over 15 symbols')
-  .trim()
-  .isLength({ min: 4, max: 15 });
+const emailPassCheck: ValidationChain[] = [
+  body('email', 'Email cannot be empty').trim().isEmail(),
+  body('password', 'Password must be more 4 symbols and not over 15 symbols').trim().isLength({ min: 4, max: 15 }),
+];
 
-// Registration user
+// Регистрация пользователя
 router.post(
   '/auth/registration',
 
-  emailCheck,
-  passwordCheck,
+  ...emailPassCheck,
 
   handleReqQueryError,
 
@@ -48,8 +47,7 @@ router.post(
 router.post(
   '/auth/login',
 
-  emailCheck,
-  passwordCheck,
+  ...emailPassCheck,
 
   handleReqQueryError,
 

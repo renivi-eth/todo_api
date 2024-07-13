@@ -6,7 +6,7 @@ import { AppRequest } from '../types/app-request';
 
 /**
  * Middleware который проверяет наличие токена в заголовке запроса и его валидность.
- * Добавляет в тело запроса, объект user с данными пользователя.
+ * Добавляет в тело запроса, объект user с данными пользователя - АВТОРИЗАЦИЯ
  */
 export const authMiddleware = (req: AppRequest, res: Response, next: NextFunction) => {
   if (req.method === 'OPTIONS') {
