@@ -138,9 +138,5 @@ router.delete(
   },
 );
 
-// TODO: Add get tags by task - GET /tags/by-taskId/:taskId - done
-// TODO: Add delete tag from task - DELETE /tags/:id/:taskId. Проверять что это тег пользователя
-// TODO: Add add tag to task - POST /tags/to-task/:taskId - done
-// Подумать над неймингов путей и логике работы
-
 // TODO: вынести все проверки на начилие в req user в отдельную функцию;
+// TODO: работа с валидацией, работа с параметрами / телом запроса;

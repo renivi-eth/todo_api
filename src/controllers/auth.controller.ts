@@ -9,12 +9,12 @@ import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 
 export const router = express.Router();
 
-const PASSWORD_SALT = 7;
-
 const emailPassCheck: ValidationChain[] = [
   body('email', 'Email cannot be empty').trim().isEmail(),
   body('password', 'Password must be more 4 symbols and not over 15 symbols').trim().isLength({ min: 4, max: 15 }),
 ];
+
+const PASSWORD_SALT = 7;
 
 // Регистрация пользователя
 router.post(
@@ -43,7 +43,7 @@ router.post(
   },
 );
 
-// Login user
+// Аутентификация пользователя
 router.post(
   '/auth/login',
 

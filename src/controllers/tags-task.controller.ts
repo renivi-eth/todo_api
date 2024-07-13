@@ -64,7 +64,7 @@ router.get(
     const {
       rows: [tag],
     } = await db.query<IRelationsTaskTag>(
-      'SELECT name FROM task_tag JOIN tag on task_tag.tag_id = tag.id WHERE task_id = $1 AND user_id = $2',
+      'SELECT name FROM task_tag JOIN tag ON task_tag.tag_id = tag.id WHERE task_id = $1 AND user_id = $2',
       [req.params.taskId, req.user.id],
     );
 
@@ -100,7 +100,7 @@ router.delete(
 
     const {
       rows: [tag],
-    } = await db.query<TagEntity>('DELETE FROM tag WHERE id = $1 AND user_id = $2 RETURNING *', [
+    } = await db.query<Pick<TagEntity, 'name'>>('DELETE FROM tag WHERE id = $1 AND user_id = $2 RETURNING *', [
       req.params.tagId,
       req.user.id,
     ]);
@@ -108,5 +108,3 @@ router.delete(
     return res.status(200).send([tag.name, tagTask]);
   },
 );
-
-// если таска удалена, удаляем дальше сам тэг из таблица тэгов

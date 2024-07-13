@@ -1,8 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-/**
- * Создание JWT токена для доступа (полезная нагрузка + секрет + время жизни)
- */
+// Создание JWT токена для доступа (полезная нагрузка + секрет + время жизни)
 export const generateAccessToken = (id: string, email: string) => {
   const SECRET_JWT = process.env.SECRET_JWT as string;
 

@@ -15,7 +15,7 @@ const bodyTaskCheck: ValidationChain[] = [
   body('state', 'State must be only backlog, in-progress or done').isIn(['backlog', 'in-progress', 'done']),
 ];
 
-// GET - ALL TASK
+// Получить все задачи
 router.get(
   '/tasks',
 
@@ -39,7 +39,7 @@ router.get(
   },
 );
 
-// GET - GET TASK BY ID
+// Получить все задачи по ID
 router.get(
   '/task/:id',
 
@@ -59,14 +59,14 @@ router.get(
     } = await db.query('SELECT * FROM task WHERE user_id = $1 AND id = $2', [req.user.id, req.params.id]);
 
     if (!task) {
-      return res.status(404).send(`Task by ${req.params.id} id not found`);
+      return res.status(404).send(`Task by ${req.params.id} ID not found`);
     }
 
     return res.status(200).send(task);
   },
 );
 
-// POST - CREATE TASK
+// Создать задачу 
 router.post(
   '/task',
 
