@@ -1,20 +1,13 @@
-import { body, ValidationChain } from 'express-validator';
 import { compare, hash } from 'bcrypt-ts';
 import express, { Request, Response } from 'express';
 
 import { db } from '../database';
+import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 import { UserEntity } from '../lib/types/user.entity';
 import { generateAccessToken } from '../lib/utilts/generate-jwt-token';
-import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
+import { emailPassCheck } from '../lib/variables/validation';
 
 export const router = express.Router();
-
-const emailPassCheck: ValidationChain[] = [
-  body('email', 'Email cannot be empty').trim().isEmail(),
-  body('password', 'Password must be more 4 symbols and not over 15 symbols').trim().isLength({ min: 4, max: 15 }),
-];
-
-const PASSWORD_SALT = 7;
 
 // Регистрация пользователя
 router.post(
@@ -35,7 +28,7 @@ router.post(
       return res.status(409).send('User with it email already exist');
     }
 
-    const hashPassword = await hash(password, PASSWORD_SALT);
+    const hashPassword = await hash(password, Number(process.env.PASSWORD_SALT));
 
     await db.query('INSERT INTO "user"(email, password) VALUES ($1,$2)', [email, hashPassword]);
 

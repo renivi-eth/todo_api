@@ -4,16 +4,11 @@ import { body, param, ValidationChain } from 'express-validator';
 import { db } from '../database';
 import { AppRequest } from '../lib/types/app-request';
 import { TaskEntity } from '../lib/types/task.entity';
+import { bodyTaskCheck } from '../lib/variables/validation';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 
 export const router = express.Router();
-
-const bodyTaskCheck: ValidationChain[] = [
-  body('name', 'Name must be a string').isString().isString().trim().isLength({ min: 0, max: 30 }),
-  body('description', 'Description must be a text').isString().trim(),
-  body('state', 'State must be only backlog, in-progress or done').isIn(['backlog', 'in-progress', 'done']),
-];
 
 // Получить все задачи
 router.get(
@@ -66,7 +61,7 @@ router.get(
   },
 );
 
-// Создать задачу 
+// Создать задачу
 router.post(
   '/task',
 
@@ -100,9 +95,7 @@ router.put(
   authMiddleware,
 
   param('id', 'ID must be UUID').trim().notEmpty().isUUID(),
-  body('name', 'Name must be a string').isString().isString().trim().isLength({ min: 0, max: 30 }),
-  body('description', 'Description must be a text').isString().trim(),
-  body('state', 'State must be only backlog, in-progress or done').isIn(['backlog', 'in-progress', 'done']),
+  ...bodyTaskCheck,
 
   handleReqQueryError,
 

@@ -1,17 +1,14 @@
 import express, { Response } from 'express';
-import { body, param } from 'express-validator';
+import { param } from 'express-validator';
 
 import { db } from '../database';
-import { TagEntity } from '../lib/types/tag.entity';
-import { AppRequest } from '../lib/types/app-request';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
+import { AppRequest } from '../lib/types/app-request';
+import { TagEntity } from '../lib/types/tag.entity';
+import { tagNameCheck } from '../lib/variables/validation';
 
 export const router = express.Router();
-
-const tagNameCheck = body('name', 'Tag is required or must be min 3 and max 50 symbols')
-  .isString()
-  .isLength({ min: 3, max: 50 });
 
 router.get(
   '/tags',
