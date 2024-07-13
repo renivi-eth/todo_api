@@ -89,6 +89,7 @@ router.post(
   },
 );
 
+// Обновить задачу по ID
 router.put(
   '/task/:id',
 
@@ -121,6 +122,7 @@ router.put(
   },
 );
 
+// Удалить задачу по ID
 router.delete(
   '/task/:id',
 

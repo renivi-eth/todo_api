@@ -10,6 +10,7 @@ import { tagNameCheck } from '../lib/variables/validation';
 
 export const router = express.Router();
 
+// Получить все тэги
 router.get(
   '/tags',
 
@@ -32,6 +33,7 @@ router.get(
   },
 );
 
+// Полчучить тэги по ID
 router.get(
   '/tags/:id',
 
@@ -58,6 +60,7 @@ router.get(
   },
 );
 
+// Создать новый тэг
 router.post(
   '/tags',
 
@@ -83,6 +86,7 @@ router.post(
   },
 );
 
+// Обновить тэг
 router.put(
   '/tags/:id',
 
@@ -110,6 +114,7 @@ router.put(
   },
 );
 
+// Удалить тэг по ID
 router.delete(
   '/tag/:id',
 
