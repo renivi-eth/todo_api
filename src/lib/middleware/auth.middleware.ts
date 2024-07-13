@@ -15,30 +15,26 @@ export const authMiddleware = (req: AppRequest, res: Response, next: NextFunctio
   }
 
   if (!req.headers.authorization) {
-    res.status(401).send('Authorization header is required');
-    return;
+    return res.status(401).send('Authorization header is required');
   }
 
   try {
     const [, token] = req.headers.authorization.split(' ');
 
     if (!token) {
-      res.status(401).send('Authorization token is required');
-      return;
+      return res.status(401).send('Authorization token is required');
     }
 
     const decodedData = jwt.verify(token, process.env.SECRET_JWT as string) as IUserJWT;
 
     if (!decodedData.email || !decodedData.id) {
-      res.status(401).send('Invalid authorization token');
-      return;
+      return res.status(401).send('Invalid authorization token');
     }
 
     req.user = decodedData;
 
     next();
   } catch {
-    res.status(403).send('User is not authenticated');
-    return;
+    return res.status(403).send('User is not authenticated');
   }
 };
