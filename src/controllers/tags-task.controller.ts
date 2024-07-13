@@ -2,6 +2,7 @@ import express, { Response } from 'express';
 import { param } from 'express-validator';
 
 import { db } from '../database';
+import { TagEntity } from '../lib/types/tag.entity';
 import { AppRequest } from '../lib/types/app-request';
 import { IRelationsTaskTag } from '../lib/types/tast-tag.entity';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
@@ -87,15 +88,25 @@ router.delete(
     }
 
     const {
-      rows: [tag],
+      rows: [tagTask],
     } = await db.query<IRelationsTaskTag>(
       'DELETE FROM task_tag WHERE task_id = $1 AND tag_id = $2 AND EXISTS (SELECT 1 FROM tag WHERE id = $2 AND user_id = $3) RETURNING *',
       [req.params.taskId, req.params.tagId, req.user.id],
     );
 
-    if (!tag) {
+    if (!tagTask) {
       return res.status(404).send('Task-tag relationship not found');
     }
-    return res.status(200).send(tag);
+
+    const {
+      rows: [tag],
+    } = await db.query<TagEntity>('DELETE FROM tag WHERE id = $1 AND user_id = $2 RETURNING *', [
+      req.params.tagId,
+      req.user.id,
+    ]);
+
+    return res.status(200).send([tag.name, tagTask]);
   },
 );
+
+// если таска удалена, удаляем дальше сам тэг из таблица тэгов
