@@ -3,12 +3,13 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Создание экземпляра подключения к PostgreSQL
 export const db = new pg.Pool({
   user: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   host: process.env.POSTGRES_HOST,
   port: Number(process.env.POSTGRES_PORT),
-  database: 'todo',
+  database: process.env.POSTGRES_DB,
 });
 
 // Подключение к PostgresSQL
