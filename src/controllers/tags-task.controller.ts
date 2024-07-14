@@ -10,7 +10,7 @@ import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 
 export const router = express.Router();
 
-// Связать задачу с тэгом
+// Связать задачу с тэгом:
 router.post(
   '/tags/to-task/:taskId/:tagId',
 
@@ -48,7 +48,7 @@ router.post(
   },
 );
 
-// Получить тэги по задаче
+// Получить тэги по задаче:
 router.get(
   '/tags/by-TaskId/:taskId',
 
@@ -74,7 +74,7 @@ router.get(
   },
 );
 
-// Удалить связь задачи с тэгом + удалить сам тэг
+// Удалить связь задачи с тэгом + удалить сам тэг:
 router.delete(
   '/tags/:taskId/:tagId',
 

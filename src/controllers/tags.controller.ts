@@ -2,11 +2,11 @@ import express, { Response } from 'express';
 import { param } from 'express-validator';
 
 import { db } from '../database';
+import { TagEntity } from '../lib/types/tag.entity';
+import { AppRequest } from '../lib/types/app-request';
+import { tagNameCheck } from '../lib/variables/validation';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
-import { AppRequest } from '../lib/types/app-request';
-import { TagEntity } from '../lib/types/tag.entity';
-import { tagNameCheck } from '../lib/variables/validation';
 
 export const router = express.Router();
 
@@ -141,4 +141,4 @@ router.delete(
 );
 
 // TODO: вынести все проверки на начилие в req user в отдельную функцию;
-// TODO: работа с валидацией, работа с параметрами / телом запроса;
+// TODO: работа с валидацией, работа с параметрами / телом запроса - НУЖНО ЛИ;
