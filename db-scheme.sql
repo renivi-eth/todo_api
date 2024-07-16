@@ -15,7 +15,7 @@ CREATE TABLE task
     name        VARCHAR(30) NOT NULL,
     description TEXT,
     state       task_state  NOT NULL DEFAULT 'backlog',
-    user_id     UUID REFERENCES "user" (id),
+    user_id     UUID REFERENCES "user" (id) ON DELETE CASCADE,
     created_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -24,7 +24,7 @@ CREATE TABLE tag
 (
     id         UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
     name       VARCHAR(50) NOT NULL,
-    user_id    UUID REFERENCES "user" (id),
+    user_id    UUID REFERENCES "user" (id) ON DELETE CASCADE,
     created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

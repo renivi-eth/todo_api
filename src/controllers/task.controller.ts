@@ -28,9 +28,7 @@ router.get(
     if (task.length === 0) {
       return res.status(200).send(`User with ${req.user.email} email has not created a task yet`);
     }
-    {
-      return res.status(200).send(task);
-    }
+    return res.status(200).send(task);
   },
 );
 

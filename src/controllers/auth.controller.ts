@@ -2,10 +2,10 @@ import { compare, hash } from 'bcrypt-ts';
 import express, { Request, Response } from 'express';
 
 import { db } from '../database';
-import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 import { UserEntity } from '../lib/types/user.entity';
-import { generateAccessToken } from '../lib/utilts/generate-jwt-token';
 import { emailPassCheck } from '../lib/variables/validation';
+import { generateAccessToken } from '../lib/utilts/generate-jwt-token';
+import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 
 export const router = express.Router();
 
