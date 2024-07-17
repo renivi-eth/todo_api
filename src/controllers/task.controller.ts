@@ -1,14 +1,11 @@
 import express, { Response } from 'express';
 import { param } from 'express-validator';
 
-import { db } from '../database';
+import { knex } from '../database';
 import { AppRequest } from '../lib/types/app-request';
-import { TaskEntity } from '../lib/types/task.entity';
 import { bodyTaskCheck } from '../lib/variables/validation';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
-import { knex } from '../database';
-import { de } from '@faker-js/faker';
 
 export const router = express.Router();
 
