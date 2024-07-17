@@ -1,7 +1,15 @@
-import pg from 'pg';
 import dotenv from 'dotenv';
+import pg from 'pg';
+import Knex from 'knex';
 
 dotenv.config();
+
+// Подключение к knex.js
+export const knex = Knex({
+  client: 'pg',
+  connection: process.env.PG_CONNECTION_STRING,
+  searchPath: ['knex', 'public'],
+});
 
 // Создание экземпляра подключения к PostgreSQL
 export const db = new pg.Pool({
@@ -12,11 +20,13 @@ export const db = new pg.Pool({
   database: process.env.POSTGRES_DB,
 });
 
-// Подключение к PostgresSQL
-db.query('SELECT NOW()')
-  .then(() => {
-    console.log('Connection with Postgres successful');
+knex
+  .raw('SELECT NOW()')
+  .then((res: string) => {
+    console.log('PostgreSQL is running');
+    return res;
   })
-  .catch((err) => {
-    console.error('Error with connection PostgreSQL:', err);
+  .catch((err: Error) => {
+    console.log('Error to connection PostgreSQL');
+    return err;
   });
