@@ -2,6 +2,7 @@ import express, { Response } from 'express';
 import { param } from 'express-validator';
 
 import { knex } from '../database';
+import { TaskEntity } from '../lib/types/task.entity';
 import { AppRequest } from '../lib/types/app-request';
 import { bodyTaskCheck } from '../lib/variables/validation';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
@@ -22,7 +23,7 @@ router.get(
       throw new Error('User not found');
     }
 
-    const query = await knex('task').where({ user_id: req.user.id }).select('*');
+    const query = await knex<TaskEntity>('task').where({ user_id: req.user.id }).select('*');
 
     if (query.length === 0) {
       return res.status(200).send(`User with ${req.user.email} email has not created a task yet`);
@@ -46,7 +47,7 @@ router.get(
       throw new Error('User not found');
     }
 
-    const query = await knex('task').where({ user_id: req.user.id, id: req.params.id });
+    const query = await knex<TaskEntity>('task').where({ user_id: req.user.id, id: req.params.id });
 
     if (query.length === 0) {
       return res.status(404).send(`Task by ${req.params.id} ID not found`);
@@ -72,7 +73,7 @@ router.post(
 
     const { name, description, state } = req.body;
 
-    const query = await knex('task')
+    const query = await knex<TaskEntity>('task')
       .insert({
         name: name,
         description: description,
@@ -103,7 +104,7 @@ router.put(
 
     const { name, description, state } = req.body;
 
-    const query = await knex('task')
+    const query = await knex<TaskEntity>('task')
       .where({ user_id: req.user.id, id: req.params.id })
       .update({
         name: name,
@@ -132,7 +133,10 @@ router.delete(
       throw new Error('User not found');
     }
 
-    const query = await knex('task').where({ id: req.params.id, user_id: req.user.id }).del().returning('*');
+    const query = await knex<TaskEntity>('task')
+      .where({ id: req.params.id, user_id: req.user.id })
+      .del()
+      .returning('*');
 
     if (!query) {
       return res.status(404).send('Task not found or not authorized to delete this task');
