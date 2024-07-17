@@ -9,18 +9,6 @@ import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 
 export const router = express.Router();
 
-// Тестовая ручка
-router.get(
-  '/knex/getAll',
-  authMiddleware,
-
-  async (req: AppRequest, res: Response) => {
-    const query = await knex.select('email', 'password').from('user');
-    console.log(query);
-    return res.status(200).send(query);
-  },
-);
-
 // Получить все задачи
 router.get(
   '/tasks',
