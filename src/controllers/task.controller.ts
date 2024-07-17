@@ -1,12 +1,12 @@
 import express, { Response } from 'express';
-import { body, param, ValidationChain } from 'express-validator';
+import { param } from 'express-validator';
 
 import { db } from '../database';
+import { authMiddleware } from '../lib/middleware/auth.middleware';
+import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 import { AppRequest } from '../lib/types/app-request';
 import { TaskEntity } from '../lib/types/task.entity';
 import { bodyTaskCheck } from '../lib/variables/validation';
-import { authMiddleware } from '../lib/middleware/auth.middleware';
-import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 
 export const router = express.Router();
 
@@ -54,7 +54,6 @@ router.get(
     if (!task) {
       return res.status(404).send(`Task by ${req.params.id} ID not found`);
     }
-
     return res.status(200).send(task);
   },
 );
