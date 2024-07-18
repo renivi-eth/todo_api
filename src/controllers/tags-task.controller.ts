@@ -1,8 +1,8 @@
-import express, { Response } from 'express';
 import { param } from 'express-validator';
+import express, { Response } from 'express';
 
-import { db } from '../database';
 import { knex } from '../database';
+
 import { TagEntity } from '../lib/types/tag.entity';
 import { AppRequest } from '../lib/types/app-request';
 import { IRelationsTaskTag } from '../lib/types/tast-tag.entity';
@@ -13,6 +13,7 @@ export const router = express.Router();
 
 // Связать задачу с тэгом:
 // TODO: добавить проверки существования задачи и тега в таблицах - task, tag, иначе запрос будет падать
+// TODO: проверка ручки удаления (on delete cascade)
 router.post(
   '/tags/to-task/:taskId/:tagId',
 
@@ -86,7 +87,7 @@ router.delete(
       throw new Error('User not found');
     }
 
-    const [query] = await knex('task_tag')
+    const [query] = await knex<IRelationsTaskTag>('task_tag')
       .where({ task_id: req.params.taskId, tag_id: req.params.tagId })
       .del()
       .returning('*');

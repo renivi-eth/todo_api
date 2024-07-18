@@ -2,6 +2,7 @@ import express, { Response } from 'express';
 import { param } from 'express-validator';
 
 import { knex } from '../database';
+
 import { TaskEntity } from '../lib/types/task.entity';
 import { AppRequest } from '../lib/types/app-request';
 import { bodyTaskCheck } from '../lib/variables/validation';

@@ -2,6 +2,7 @@ import { compare, hash } from 'bcrypt-ts';
 import express, { Request, Response } from 'express';
 
 import { knex } from '../database';
+
 import { UserEntity } from '../lib/types/user.entity';
 import { PostgresError } from '../lib/types/pg-error';
 import { emailPassCheck } from '../lib/variables/validation';
