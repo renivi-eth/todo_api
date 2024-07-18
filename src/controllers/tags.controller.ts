@@ -1,15 +1,13 @@
 import express, { Response } from 'express';
 import { param } from 'express-validator';
 
-import { db } from '../database';
 import { knex } from '../database';
 import { TagEntity } from '../lib/types/tag.entity';
 
-import { AppRequest } from '../lib/types/app-request';
-import { tagNameCheck } from '../lib/variables/validation';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
-import { Query } from 'pg';
+import { AppRequest } from '../lib/types/app-request';
+import { tagNameCheck } from '../lib/variables/validation';
 
 export const router = express.Router();
 
@@ -74,7 +72,7 @@ router.post(
       throw new Error('User not found');
     }
 
-    const [query] = await knex('tag').insert({ name: req.body.name, user_id: req.user.id }).returning('*');
+    const [query] = await knex<TagEntity>('tag').insert({ name: req.body.name, user_id: req.user.id }).returning('*');
 
     return res.status(201).send(query);
   },
@@ -96,7 +94,7 @@ router.put(
       throw new Error('User not found');
     }
 
-    const [query] = await knex('tag')
+    const [query] = await knex<TagEntity>('tag')
       .where({ id: req.params.id, user_id: req.user.id })
       .update({ name: req.body.name })
       .returning('*');
@@ -120,7 +118,10 @@ router.delete(
       throw new Error('User not found');
     }
 
-    const [query] = await knex('tag').where({ id: req.params.id, user_id: req.user.id }).del().returning('*');
+    const [query] = await knex<TagEntity>('tag')
+      .where({ id: req.params.id, user_id: req.user.id })
+      .del()
+      .returning('*');
 
     if (!query) {
       return res.status(400).send('Tags not found');

@@ -2,6 +2,7 @@ import express, { Response } from 'express';
 import { param } from 'express-validator';
 
 import { db } from '../database';
+import { knex } from '../database';
 import { TagEntity } from '../lib/types/tag.entity';
 import { AppRequest } from '../lib/types/app-request';
 import { IRelationsTaskTag } from '../lib/types/tast-tag.entity';
@@ -11,6 +12,7 @@ import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 export const router = express.Router();
 
 // Связать задачу с тэгом:
+// TODO: добавить проверки существования задачи и тега в таблицах - task, tag, иначе запрос будет падать
 router.post(
   '/tags/to-task/:taskId/:tagId',
 
@@ -26,25 +28,21 @@ router.post(
       throw new Error('User not found');
     }
 
-    const {
-      rows: [checkTestTag],
-    } = await db.query<IRelationsTaskTag>('SELECT * FROM task_tag WHERE task_id = $1 AND tag_id = $2', [
-      req.params.taskId,
-      req.params.tagId,
-    ]);
+    const checkRelations = await knex<IRelationsTaskTag>('task_tag').where({
+      task_id: req.params.taskId,
+      tag_id: req.params.tagId,
+    });
+    console.log(checkRelations.length);
 
-    if (checkTestTag) {
+    if (checkRelations.length > 0) {
       return res.status(400).send('Relations with task and tags already exist');
     }
 
-    const {
-      rows: [taskTag],
-    } = await db.query<IRelationsTaskTag>('INSERT into task_tag(task_id, tag_id) VALUES ($1, $2) RETURNING *', [
-      req.params.taskId,
-      req.params.tagId,
-    ]);
+    const taskTagRelations = await knex<IRelationsTaskTag>('task_tag')
+      .insert({ task_id: req.params.taskId, tag_id: req.params.tagId })
+      .returning('*');
 
-    return res.status(201).send(taskTag);
+    return res.status(201).send(taskTagRelations);
   },
 );
 
@@ -63,14 +61,12 @@ router.get(
       throw new Error('User not found');
     }
 
-    const {
-      rows: [tag],
-    } = await db.query<IRelationsTaskTag>(
-      'SELECT name FROM task_tag JOIN tag ON task_tag.tag_id = tag.id WHERE task_id = $1 AND user_id = $2',
-      [req.params.taskId, req.user.id],
-    );
+    const [query] = await knex<Pick<TagEntity, 'name'>>('task_tag')
+      .join('tag', 'tag_id', '=', 'tag.id')
+      .where({ task_id: req.params.taskId, user_id: req.user.id })
+      .select('name');
 
-    return res.status(200).send(tag);
+    return res.status(200).send(query);
   },
 );
 
