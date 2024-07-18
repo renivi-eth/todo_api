@@ -2,11 +2,14 @@ import express, { Response } from 'express';
 import { param } from 'express-validator';
 
 import { db } from '../database';
+import { knex } from '../database';
 import { TagEntity } from '../lib/types/tag.entity';
+
 import { AppRequest } from '../lib/types/app-request';
 import { tagNameCheck } from '../lib/variables/validation';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
+import { Query } from 'pg';
 
 export const router = express.Router();
 
@@ -21,15 +24,13 @@ router.get(
       throw new Error('User not found');
     }
 
-    const { rows: tags } = await db.query<TagEntity>('SELECT * FROM tag WHERE user_id = $1', [req.user.id]);
+    const query = await knex<TagEntity>('tag').where({ user_id: req.user.id });
 
-    if (!tags) {
-      res.status(404).send('Tags not found or not authorized');
-      return;
+    if (query.length === 0) {
+      return res.status(404).send('Tags not found or not authorized');
     }
 
-    res.status(200).send(tags);
-    return;
+    return res.status(200).send(query);
   },
 );
 
@@ -48,15 +49,13 @@ router.get(
       throw new Error('User not found');
     }
 
-    const {
-      rows: [tag],
-    } = await db.query<TagEntity>('SELECT * FROM tag WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+    const query = await knex<TagEntity>('tag').where({ id: req.params.id, user_id: req.user.id });
 
-    if (!tag) {
+    if (query.length === 0) {
       return res.status(404).send(`Tags by ${req.params.id} id not found`);
     }
 
-    return res.status(200).send(tag);
+    return res.status(200).send(query);
   },
 );
 
@@ -75,14 +74,9 @@ router.post(
       throw new Error('User not found');
     }
 
-    const {
-      rows: [tag],
-    } = await db.query<TagEntity>('INSERT INTO tag (name, user_id) VALUES ($1, $2) RETURNING *', [
-      req.body.name,
-      req.user.id,
-    ]);
+    const [query] = await knex('tag').insert({ name: req.body.name, user_id: req.user.id }).returning('*');
 
-    return res.status(201).send(tag);
+    return res.status(201).send(query);
   },
 );
 
@@ -102,15 +96,12 @@ router.put(
       throw new Error('User not found');
     }
 
-    const {
-      rows: [tag],
-    } = await db.query<TagEntity>('UPDATE tag SET name = $2 WHERE id = $1 AND user_id = $3 RETURNING *', [
-      req.params.id,
-      req.body.name,
-      req.user.id,
-    ]);
+    const [query] = await knex('tag')
+      .where({ id: req.params.id, user_id: req.user.id })
+      .update({ name: req.body.name })
+      .returning('*');
 
-    return res.status(201).send(tag);
+    return res.status(201).send(query);
   },
 );
 
@@ -129,13 +120,12 @@ router.delete(
       throw new Error('User not found');
     }
 
-    const {
-      rows: [tag],
-    } = await db.query<TagEntity>('DELETE FROM tag WHERE id = $1 AND user_id = $2 RETURNING *', [
-      req.params.id,
-      req.user.id,
-    ]);
+    const [query] = await knex('tag').where({ id: req.params.id, user_id: req.user.id }).del().returning('*');
 
-    return res.status(200).send(tag);
+    if (!query) {
+      return res.status(400).send('Tags not found');
+    }
+
+    return res.status(200).send(query);
   },
 );
