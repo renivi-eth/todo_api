@@ -86,24 +86,15 @@ router.delete(
       throw new Error('User not found');
     }
 
-    const {
-      rows: [tagTask],
-    } = await db.query<IRelationsTaskTag>(
-      'DELETE FROM task_tag WHERE task_id = $1 AND tag_id = $2 AND EXISTS (SELECT 1 FROM tag WHERE id = $2 AND user_id = $3) RETURNING *',
-      [req.params.taskId, req.params.tagId, req.user.id],
-    );
+    const [query] = await knex('task_tag')
+      .where({ task_id: req.params.taskId, tag_id: req.params.tagId })
+      .del()
+      .returning('*');
 
-    if (!tagTask) {
+    if (!query) {
       return res.status(404).send('Task-tag relationship not found');
     }
 
-    const {
-      rows: [tag],
-    } = await db.query<Pick<TagEntity, 'name'>>('DELETE FROM tag WHERE id = $1 AND user_id = $2 RETURNING *', [
-      req.params.tagId,
-      req.user.id,
-    ]);
-
-    return res.status(200).send([tag.name, tagTask]);
+    return res.status(200).send(query);
   },
 );
