@@ -1,13 +1,16 @@
 import express, { Response } from 'express';
-import { param, query } from 'express-validator';
+import { param } from 'express-validator';
 
 import { knex } from '../database';
 
-import { TaskEntity } from '../lib/types/task.entity';
 import { AppRequest } from '../lib/types/app-request';
-import { bodyTaskCheck } from '../lib/variables/validation';
+import { TaskEntity } from '../lib/types/task.entity';
+import { TaskState } from '../lib/variables/task-state';
+import { bodyTaskCheck } from '../validation/body-task-check';
+import { queryParamCheck } from '../validation/query-param-check';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
+import { IQueryParam } from '../lib/types/query-params';
 
 export const router = express.Router();
 
@@ -15,7 +18,7 @@ export const router = express.Router();
 router.get(
   '/tasks',
 
-  query('limit', 'Limit must be number and positive').optional().trim().isInt({ min: 1 }),
+  ...queryParamCheck,
 
   authMiddleware,
 
@@ -28,10 +31,31 @@ router.get(
 
     const query = knex<TaskEntity>('task').where({ user_id: req.user.id }).select('*');
 
-    const limit = req.query.limit;
+    // const limit: IQueryParam = req.query.limit;
+    // let filterState: TaskState | null = null;
 
-    if (limit) {
-      query.limit(Number(limit));
+    const queryParam: IQueryParam = {
+      limit: Number(req.query.limit),
+      state: req.query.state as TaskState,
+    };
+
+    switch (req.query.state) {
+      case 'backlog':
+        queryParam.state = TaskState.BACKLOG;
+        break;
+      case 'in-progress':
+        queryParam.state = TaskState.IN_PROGRESS;
+        break;
+      case 'done':
+        queryParam.state = TaskState.DONE;
+        break;
+    }
+
+    if (queryParam.limit) {
+      query.limit(Number(queryParam.limit));
+    }
+    if (queryParam.state) {
+      query.where({ state: queryParam.state });
     }
 
     const task = await query;

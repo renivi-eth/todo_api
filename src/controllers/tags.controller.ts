@@ -5,7 +5,7 @@ import { knex } from '../database';
 
 import { TagEntity } from '../lib/types/tag.entity';
 import { AppRequest } from '../lib/types/app-request';
-import { tagNameCheck } from '../lib/variables/validation';
+import { tagNameCheck } from '../validation/tag-name-check';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 
