@@ -11,6 +11,7 @@ import { bodyTaskCheck } from '../validation/body-task-check';
 import { queryParamCheck } from '../validation/query-param-check';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
+import { SortDirection } from '../lib/variables/sort';
 
 export const router = express.Router();
 
@@ -34,6 +35,8 @@ router.get(
     const queryParam: IQueryParam = {
       limit: Number(req.query.limit),
       state: req.query.state as TaskState,
+      sortColumn: String(req.query.sort),
+      direction: null,
     };
 
     switch (req.query.state) {
@@ -48,11 +51,29 @@ router.get(
         break;
     }
 
+    switch (req.query.sort) {
+      case 'created-at':
+        queryParam.sortColumn = 'created_at';
+        queryParam.direction = SortDirection.DESC;
+        break;
+      case 'name':
+        queryParam.sortColumn = 'name';
+        queryParam.direction = SortDirection.ASC;
+        break;
+      default:
+        queryParam.sortColumn = 'name';
+        queryParam.direction = SortDirection.ASC;
+        break;
+    }
+
     if (queryParam.limit) {
       query.limit(queryParam.limit);
     }
     if (queryParam.state) {
       query.where({ state: queryParam.state });
+    }
+    if (queryParam.sortColumn) {
+      query.orderBy(queryParam.sortColumn, queryParam.direction);
     }
 
     const getAllTask = await query;
