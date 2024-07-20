@@ -1,5 +1,5 @@
 import express, { Response } from 'express';
-import { param } from 'express-validator';
+import { param, query } from 'express-validator';
 
 import { knex } from '../database';
 
@@ -15,6 +15,8 @@ export const router = express.Router();
 router.get(
   '/tasks',
 
+  query('limit', 'Limit must be number and positive').optional().trim().isInt({ min: 1 }),
+
   authMiddleware,
 
   handleReqQueryError,
@@ -24,12 +26,20 @@ router.get(
       throw new Error('User not found');
     }
 
-    const query = await knex<TaskEntity>('task').where({ user_id: req.user.id }).select('*');
+    const query = knex<TaskEntity>('task').where({ user_id: req.user.id }).select('*');
 
-    if (query.length === 0) {
+    const limit = req.query.limit;
+
+    if (limit) {
+      query.limit(Number(limit));
+    }
+
+    const task = await query;
+
+    if (task.length === 0) {
       return res.status(200).send(`User with ${req.user.email} email has not created a task yet`);
     }
-    return res.status(200).send(query);
+    return res.status(200).send(task);
   },
 );
 
