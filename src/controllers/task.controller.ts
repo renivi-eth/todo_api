@@ -31,9 +31,6 @@ router.get(
 
     const query = knex<TaskEntity>('task').where({ user_id: req.user.id }).select('*');
 
-    // const limit: IQueryParam = req.query.limit;
-    // let filterState: TaskState | null = null;
-
     const queryParam: IQueryParam = {
       limit: Number(req.query.limit),
       state: req.query.state as TaskState,
@@ -52,18 +49,19 @@ router.get(
     }
 
     if (queryParam.limit) {
-      query.limit(Number(queryParam.limit));
+      query.limit(queryParam.limit);
     }
     if (queryParam.state) {
       query.where({ state: queryParam.state });
     }
 
-    const task = await query;
+    const getAllTask = await query;
 
-    if (task.length === 0) {
+    if (getAllTask.length === 0) {
       return res.status(200).send(`User with ${req.user.email} email has not created a task yet`);
     }
-    return res.status(200).send(task);
+
+    return res.status(200).send(getAllTask);
   },
 );
 
