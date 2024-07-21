@@ -5,11 +5,12 @@
     "node": "20.15.0"
   },
   "version": "1.0.0",
-  "description": "Restful API for a todo app",
+  "description": "RESTFull API for a todo app",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "npx nodemon"
+    "dev": "npx nodemon",
+    "fake_data": "tsx src/scripts/data-fake.ts"
   },
   "author": "renivi",
   "license": "ISC",
@@ -34,6 +35,7 @@
     "nodemon": "3.1.0",
     "prettier": "3.2.5",
     "ts-node": "10.9.2",
+    "tsx": "^4.16.2",
     "typescript": "5.4.5"
   }
 }
