@@ -5,13 +5,14 @@ import { knex } from '../database';
 
 import { AppRequest } from '../lib/types/app-request';
 import { TaskEntity } from '../lib/types/task.entity';
+
+import { SortDirection } from '../lib/variables/sort';
 import { TaskState } from '../lib/variables/task-state';
 import { IQueryParam } from '../lib/types/query-params';
 import { bodyTaskCheck } from '../validation/body-task-check';
 import { queryParamCheck } from '../validation/query-param-check';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
-import { SortDirection } from '../lib/variables/sort';
 
 export const router = express.Router();
 

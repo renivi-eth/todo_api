@@ -6,4 +6,5 @@ export const queryParamCheck: ValidationChain[] = [
     .optional()
     .trim()
     .isIn(['backlog', 'in-progress', 'done']),
+  query('sort', 'Sort mut be created-at or name').optional().trim().isIn(['created-at', 'name', '']),
 ];
