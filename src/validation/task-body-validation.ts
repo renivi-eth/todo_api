@@ -1,8 +1,5 @@
 import { body, ValidationChain } from 'express-validator';
 import { TaskState } from '../lib/variables/task-state';
-
-// TODO: убрать все trim()
-
 /*
 Валидация данных в теле запроса (body) при создании задачи (POST)
 */
