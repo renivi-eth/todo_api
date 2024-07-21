@@ -2,6 +2,8 @@ import { faker } from '@faker-js/faker';
 import { knex } from '../database';
 import { hash } from 'bcrypt-ts';
 
+// TODO: Удалить весь Fake Data модуль
+
 import { UserEntity } from '../lib/types/user.entity';
 import { TaskEntity } from '../lib/types/task.entity';
 import { TaskState } from '../lib/variables/task-state';

@@ -32,7 +32,7 @@ router.get(
   },
 );
 
-// Получить тэги по ID
+// Получить тэг по ID
 router.get(
   '/tags/:id',
 
@@ -72,9 +72,9 @@ router.post(
       throw new Error('User not found');
     }
 
-    const [query] = await knex<TagEntity>('tag').insert({ name: req.body.name, user_id: req.user.id }).returning('*');
+    const [tag] = await knex<TagEntity>('tag').insert({ name: req.body.name, user_id: req.user.id }).returning('*');
 
-    return res.status(201).send(query);
+    return res.status(201).send(tag);
   },
 );
 
@@ -96,6 +96,7 @@ router.put(
 
     const [query] = await knex<TagEntity>('tag')
       .where({ id: req.params.id, user_id: req.user.id })
+      // TODO: Не обновляем updated_at
       .update({ name: req.body.name })
       .returning('*');
 
@@ -124,7 +125,7 @@ router.delete(
       .returning('*');
 
     if (!query) {
-      return res.status(400).send('Tags not found');
+      return res.status(404).send('Tag not found');
     }
 
     return res.status(200).send(query);

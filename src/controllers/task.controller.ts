@@ -16,6 +16,8 @@ import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 
 export const router = express.Router();
 
+// TODO: Научиться передавать тип QueryParams в параметры запроса
+
 // Получить все задачи
 router.get(
   '/tasks',
@@ -31,7 +33,7 @@ router.get(
       throw new Error('User not found');
     }
 
-    const query = knex<TaskEntity>('task').where({ user_id: req.user.id }).select('*');
+    const query = knex<TaskEntity>('task').select('*');
 
     const queryParam: IQueryParam = {
       limit: Number(req.query.limit),
@@ -39,18 +41,6 @@ router.get(
       sortColumn: String(req.query.sort),
       direction: null,
     };
-
-    switch (req.query.state) {
-      case 'backlog':
-        queryParam.state = TaskState.BACKLOG;
-        break;
-      case 'in-progress':
-        queryParam.state = TaskState.IN_PROGRESS;
-        break;
-      case 'done':
-        queryParam.state = TaskState.DONE;
-        break;
-    }
 
     switch (req.query.sort) {
       case 'created-at':
@@ -70,29 +60,28 @@ router.get(
     if (queryParam.limit) {
       query.limit(queryParam.limit);
     }
-    if (queryParam.state) {
-      query.where({ state: queryParam.state });
+
+    if (req.query.state) {
+      query.where({ state: req.query.state });
     }
-    if (queryParam.sortColumn) {
+
+    if (req.query.sort) {
       query.orderBy(queryParam.sortColumn, queryParam.direction);
     }
 
     const getAllTask = await query;
 
-    if (getAllTask.length === 0) {
-      return res.status(200).send(`User with ${req.user.email} email has not created a task yet`);
-    }
-
     return res.status(200).send(getAllTask);
   },
 );
 
-// Получить все задачи по ID
+// Получить задачу по ID
 router.get(
   '/task/:id',
 
   authMiddleware,
 
+  // TODO: Убрать в отдельную функцию
   param('id').trim().notEmpty().isUUID(),
 
   handleReqQueryError,
@@ -102,12 +91,13 @@ router.get(
       throw new Error('User not found');
     }
 
-    const query = await knex<TaskEntity>('task').where({ user_id: req.user.id, id: req.params.id });
+    const task = await knex<TaskEntity>('task').where({ user_id: req.user.id, id: req.params.id }).first();
 
-    if (query.length === 0) {
+    if (!task) {
       return res.status(404).send(`Task by ${req.params.id} ID not found`);
     }
-    return res.status(200).send(query);
+
+    return res.status(200).send(task);
   },
 );
 
@@ -126,9 +116,10 @@ router.post(
       throw new Error('User not found');
     }
 
+    // TODO: Обозначить типы явно
     const { name, description, state } = req.body;
 
-    const query = await knex<TaskEntity>('task')
+    const [task] = await knex<TaskEntity>('task')
       .insert({
         name: name,
         description: description,
@@ -137,7 +128,7 @@ router.post(
       })
       .returning('*');
 
-    return res.status(201).send(query);
+    return res.status(201).send(task);
   },
 );
 

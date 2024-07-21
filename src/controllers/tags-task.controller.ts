@@ -5,7 +5,7 @@ import { knex } from '../database';
 
 import { TagEntity } from '../lib/types/tag.entity';
 import { AppRequest } from '../lib/types/app-request';
-import { IRelationsTaskTag } from '../lib/types/tast-tag.entity';
+import { TaskTagEntity } from '../lib/types/task-tag.entity';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 
@@ -29,17 +29,18 @@ router.post(
       throw new Error('User not found');
     }
 
-    const checkRelations = await knex<IRelationsTaskTag>('task_tag').where({
+    // TODO: Пользователь должен создавать связи только со своими сущностями
+
+    const checkRelations = await knex<TaskTagEntity>('task_tag').where({
       task_id: req.params.taskId,
       tag_id: req.params.tagId,
     });
-    console.log(checkRelations.length);
 
-    if (checkRelations.length > 0) {
+    if (checkRelations.length) {
       return res.status(400).send('Relations with task and tags already exist');
     }
 
-    const taskTagRelations = await knex<IRelationsTaskTag>('task_tag')
+    const taskTagRelations = await knex<TaskTagEntity>('task_tag')
       .insert({ task_id: req.params.taskId, tag_id: req.params.tagId })
       .returning('*');
 
@@ -49,6 +50,7 @@ router.post(
 
 // Получить тэги по задаче:
 router.get(
+  // TODO: нейминг path
   '/tags/by-TaskId/:taskId',
 
   authMiddleware,
@@ -62,8 +64,10 @@ router.get(
       throw new Error('User not found');
     }
 
+    // TODO: Разобраться в возвращаемых значениях, это одна или много сущностей
+
     const [query] = await knex<Pick<TagEntity, 'name'>>('task_tag')
-      .join('tag', 'tag_id', '=', 'tag.id')
+      .join('tag', 'task_tag.tag_id', '=', 'tag.id')
       .where({ task_id: req.params.taskId, user_id: req.user.id })
       .select('name');
 
@@ -71,7 +75,7 @@ router.get(
   },
 );
 
-// Удалить связь задачи с тэгом + удалить сам тэг:
+// Удалить связь задачи с тэгом:
 router.delete(
   '/tags/:taskId/:tagId',
 
@@ -87,7 +91,9 @@ router.delete(
       throw new Error('User not found');
     }
 
-    const [query] = await knex<IRelationsTaskTag>('task_tag')
+    // TODO: Пользователь может удалять только свои связи
+
+    const [query] = await knex<TaskTagEntity>('task_tag')
       .where({ task_id: req.params.taskId, tag_id: req.params.tagId })
       .del()
       .returning('*');

@@ -24,6 +24,8 @@ router.post(
 
     const hashPassword = await hash(password, Number(process.env.PASSWORD_SALT));
 
+    // TODO: Посмотри как было раньше и исправь
+
     try {
       await knex<UserEntity>('user').insert({ email: email, password: hashPassword });
 
@@ -49,7 +51,8 @@ router.post(
   async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
-    const [user] = await knex<UserEntity>('user').where({ email: email });
+    // TODO: Указывать явно .select('*');
+    const user = await knex<UserEntity>('user').where({ email }).first();
 
     if (!user) {
       return res.status(404).send(`User with ${email} not found`);
