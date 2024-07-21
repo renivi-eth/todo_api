@@ -9,8 +9,8 @@ import { TaskEntity } from '../lib/types/task.entity';
 import { SortDirection } from '../lib/variables/sort';
 import { TaskState } from '../lib/variables/task-state';
 import { IQueryParam } from '../lib/types/query-params';
-import { bodyTaskCheck } from '../validation/body-task-check';
-import { queryParamCheck } from '../validation/query-param-check';
+import { bodyTaskCheck } from '../validation/task-body-validation';
+import { queryParamCheck } from '../validation/task-query-param-validation';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 

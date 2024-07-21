@@ -5,7 +5,7 @@ import { knex } from '../database';
 
 import { UserEntity } from '../lib/types/user.entity';
 import { PostgresError } from '../lib/types/pg-error';
-import { emailPassCheck } from '../validation/emaill-pass-check';
+import { emailPassCheck } from '../validation/auth-reg-body-validation';
 import { generateAccessToken } from '../lib/utilts/generate-jwt-token';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 
