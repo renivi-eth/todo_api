@@ -6,7 +6,7 @@ import { knex } from '../database';
 import { AppRequest } from '../lib/types/app-request';
 import { TaskEntity } from '../lib/types/task.entity';
 
-import { SortDirection } from '../lib/variables/sort';
+import { SortDirection } from '../lib/variables/sort-direction';
 import { TaskState } from '../lib/variables/task-state';
 import { IQueryParam } from '../lib/types/query-params';
 import { bodyTaskCheck } from '../validation/task-body-validation';

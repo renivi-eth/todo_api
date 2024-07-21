@@ -1,5 +1,5 @@
 import { TaskState } from '../variables/task-state';
-import { SortDirection } from '../variables/sort';
+import { SortDirection } from '../variables/sort-direction';
 
 // TODO: Чьи это query параметры. Почему interface, а не type ?
 
