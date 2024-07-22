@@ -5,7 +5,7 @@ import { knex } from '../database';
 
 import { UserEntity } from '../lib/types/user.entity';
 import { PostgresError } from '../lib/types/pg-error';
-import { emailPassCheck } from '../validation/auth-reg-body-validation';
+import { authBodyCheck } from '../validation/auth-body-validation';
 import { generateAccessToken } from '../lib/utilts/generate-jwt-token';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 
@@ -15,7 +15,7 @@ export const router = express.Router();
 router.post(
   '/auth/registration',
 
-  ...emailPassCheck,
+  ...authBodyCheck,
 
   handleReqQueryError,
 
@@ -44,7 +44,7 @@ router.post(
 router.post(
   '/auth/login',
 
-  ...emailPassCheck,
+  ...authBodyCheck,
 
   handleReqQueryError,
 

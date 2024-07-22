@@ -6,23 +6,23 @@ import { knex } from '../database';
 import { AppRequest } from '../lib/types/app-request';
 import { TaskEntity } from '../lib/types/task.entity';
 
-import { SortDirection } from '../lib/variables/sort-direction';
 import { TaskState } from '../lib/variables/task-state';
 import { IQueryParam } from '../lib/types/query-params';
-import { bodyTaskCheck } from '../validation/task-body-validation';
-import { queryParamCheck } from '../validation/task-query-param-validation';
+import { SortDirection } from '../lib/variables/sort-direction';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
+import { taskBodyCheck } from '../validation/task-body-validation';
+import { taskTagParamIDCheck } from '../validation/taskTag-param-id-validation';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
+import { taskQueryParamCheck } from '../validation/task-query-param-validation';
 
 export const router = express.Router();
 
-// TODO: Научиться передавать тип QueryParams в параметры запроса
-
+// TODO: Научиться передавать тип QueryParams в параметры запроса, не писать отдельно;
 // Получить все задачи
 router.get(
   '/tasks',
 
-  ...queryParamCheck,
+  ...taskQueryParamCheck,
 
   authMiddleware,
 
@@ -62,7 +62,7 @@ router.get(
     }
 
     if (req.query.state) {
-      query.where({ state: req.query.state });
+      query.where({ state: queryParam.state });
     }
 
     if (req.query.sort) {
@@ -81,8 +81,7 @@ router.get(
 
   authMiddleware,
 
-  // TODO: Убрать в отдельную функцию
-  param('id').trim().notEmpty().isUUID(),
+  taskTagParamIDCheck,
 
   handleReqQueryError,
 
@@ -107,7 +106,7 @@ router.post(
 
   authMiddleware,
 
-  ...bodyTaskCheck,
+  ...taskBodyCheck,
 
   handleReqQueryError,
 
@@ -138,8 +137,8 @@ router.put(
 
   authMiddleware,
 
-  param('id', 'ID must be UUID').trim().notEmpty().isUUID(),
-  ...bodyTaskCheck,
+  taskTagParamIDCheck,
+  ...taskBodyCheck,
 
   handleReqQueryError,
 
@@ -170,7 +169,7 @@ router.delete(
 
   authMiddleware,
 
-  param('id').trim().notEmpty().isUUID(),
+  taskTagParamIDCheck,
 
   handleReqQueryError,
 

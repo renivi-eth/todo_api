@@ -8,6 +8,8 @@ import { AppRequest } from '../lib/types/app-request';
 import { TaskTagEntity } from '../lib/types/task-tag.entity';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
+import { taskTagIdCheck } from '../validation/taskTagRelation-param-validation';
+import { taskTagParamIDCheck } from '../validation/taskTag-param-id-validation';
 
 export const router = express.Router();
 
@@ -55,7 +57,7 @@ router.get(
 
   authMiddleware,
 
-  param('taskId', 'ID must be UUID').trim().isUUID(),
+  taskTagParamIDCheck,
 
   handleReqQueryError,
 
@@ -81,8 +83,7 @@ router.delete(
 
   authMiddleware,
 
-  param('taskId', 'ID must be UUID').trim().isUUID(),
-  param('tagId', 'ID must be UUID').trim().isUUID(),
+  taskTagIdCheck,
 
   handleReqQueryError,
 

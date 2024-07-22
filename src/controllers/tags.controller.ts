@@ -5,9 +5,11 @@ import { knex } from '../database';
 
 import { TagEntity } from '../lib/types/tag.entity';
 import { AppRequest } from '../lib/types/app-request';
-import { tagNameCheck } from '../validation/tag-body-validation';
+import { tagBodyCheck } from '../validation/tag-body-validation';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
+
+import { taskTagParamIDCheck } from '../validation/taskTag-param-id-validation';
 
 export const router = express.Router();
 
@@ -38,7 +40,7 @@ router.get(
 
   authMiddleware,
 
-  param('id', 'ID must be UUID').trim().isUUID(),
+  taskTagParamIDCheck,
 
   handleReqQueryError,
 
@@ -63,7 +65,7 @@ router.post(
 
   authMiddleware,
 
-  tagNameCheck,
+  tagBodyCheck,
 
   handleReqQueryError,
 
@@ -84,8 +86,8 @@ router.put(
 
   authMiddleware,
 
-  param('id', 'ID must be UUID').isUUID(),
-  tagNameCheck,
+  taskTagParamIDCheck,
+  tagBodyCheck,
 
   handleReqQueryError,
 
@@ -110,7 +112,7 @@ router.delete(
 
   authMiddleware,
 
-  param('id', 'ID must be UUID').trim().isUUID(),
+  taskTagParamIDCheck,
 
   handleReqQueryError,
 
