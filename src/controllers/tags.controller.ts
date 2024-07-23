@@ -27,10 +27,12 @@ router.get(
     const query = await knex<TagEntity>('tag').where({ user_id: req.user.id });
 
     if (query.length === 0) {
-      return res.status(404).send('Tags not found or not authorized');
+      res.status(404).send('Tags not found or not authorized');
+      return;
     }
 
-    return res.status(200).send(query);
+    res.status(200).send(query);
+    return;
   },
 );
 
@@ -52,10 +54,12 @@ router.get(
     const query = await knex<TagEntity>('tag').where({ id: req.params.id, user_id: req.user.id });
 
     if (query.length === 0) {
-      return res.status(404).send(`Tags by ${req.params.id} id not found`);
+      res.status(404).send(`Tags by ${req.params.id} id not found`);
+      return;
     }
 
-    return res.status(200).send(query);
+    res.status(200).send(query);
+    return;
   },
 );
 
@@ -76,7 +80,8 @@ router.post(
 
     const [tag] = await knex<TagEntity>('tag').insert({ name: req.body.name, user_id: req.user.id }).returning('*');
 
-    return res.status(201).send(tag);
+    res.status(201).send(tag);
+    return;
   },
 );
 
@@ -102,7 +107,8 @@ router.put(
       .update({ name: req.body.name })
       .returning('*');
 
-    return res.status(201).send(query);
+    res.status(201).send(query);
+    return;
   },
 );
 
@@ -127,9 +133,11 @@ router.delete(
       .returning('*');
 
     if (!query) {
-      return res.status(404).send('Tag not found');
+      res.status(404).send('Tag not found');
+      return;
     }
 
-    return res.status(200).send(query);
+    res.status(200).send(query);
+    return;
   },
 );

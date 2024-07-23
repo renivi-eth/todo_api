@@ -71,7 +71,8 @@ router.get(
 
     const getAllTask = await query;
 
-    return res.status(200).send(getAllTask);
+    res.status(200).send(getAllTask);
+    return;
   },
 );
 
@@ -93,10 +94,12 @@ router.get(
     const task = await knex<TaskEntity>('task').where({ user_id: req.user.id, id: req.params.id }).first();
 
     if (!task) {
-      return res.status(404).send(`Task by ${req.params.id} ID not found`);
+      res.status(404).send(`Task by ${req.params.id} ID not found`);
+      return;
     }
 
-    return res.status(200).send(task);
+    res.status(200).send(task);
+    return;
   },
 );
 
@@ -115,8 +118,7 @@ router.post(
       throw new Error('User not found');
     }
 
-    // TODO: Обозначить типы явно
-    const { name, description, state } = req.body;
+    const { name, description, state }: TaskEntity = req.body;
 
     const [task] = await knex<TaskEntity>('task')
       .insert({
@@ -127,7 +129,8 @@ router.post(
       })
       .returning('*');
 
-    return res.status(201).send(task);
+    res.status(201).send(task);
+    return;
   },
 );
 
@@ -159,7 +162,8 @@ router.put(
       })
       .returning('*');
 
-    return res.status(201).send(query);
+    res.status(201).send(query);
+    return;
   },
 );
 
@@ -184,8 +188,10 @@ router.delete(
       .returning('*');
 
     if (!query) {
-      return res.status(404).send('Task not found or not authorized to delete this task');
+      res.status(404).send('Task not found or not authorized to delete this task');
+      return;
     }
-    return res.status(200).send(query);
+    res.status(200).send(query);
+    return;
   },
 );

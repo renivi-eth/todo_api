@@ -39,14 +39,16 @@ router.post(
     });
 
     if (checkRelations.length) {
-      return res.status(400).send('Relations with task and tags already exist');
+      res.status(400).send('Relations with task and tags already exist');
+      return;
     }
 
     const taskTagRelations = await knex<TaskTagEntity>('task_tag')
       .insert({ task_id: req.params.taskId, tag_id: req.params.tagId })
       .returning('*');
 
-    return res.status(201).send(taskTagRelations);
+    res.status(201).send(taskTagRelations);
+    return;
   },
 );
 
@@ -73,7 +75,8 @@ router.get(
       .where({ task_id: req.params.taskId, user_id: req.user.id })
       .select('name');
 
-    return res.status(200).send(query);
+    res.status(200).send(query);
+    return;
   },
 );
 
@@ -100,9 +103,11 @@ router.delete(
       .returning('*');
 
     if (!query) {
-      return res.status(404).send('Task-tag relationship not found');
+      res.status(404).send('Task-tag relationship not found');
+      return;
     }
 
-    return res.status(200).send(query);
+    res.status(200).send(query);
+    return;
   },
 );

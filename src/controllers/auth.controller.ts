@@ -31,7 +31,8 @@ router.post(
 
     await knex<UserEntity>('user').insert({ email: email, password: hashPassword }).returning('*');
 
-    return res.status(201).send(`User with ${email} email was create successful!`);
+    res.status(201).send(`User with ${email} email was create successful!`);
+    return;
   },
 );
 
@@ -61,6 +62,7 @@ router.post(
     }
 
     const token = generateAccessToken(checkUser.id, checkUser.email);
-    return res.status(200).json({ token });
+    res.status(200).json({ token });
+    return;
   },
 );
