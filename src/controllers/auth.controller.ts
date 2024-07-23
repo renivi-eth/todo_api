@@ -2,9 +2,7 @@ import { compare, hash } from 'bcrypt-ts';
 import express, { Request, Response } from 'express';
 
 import { knex } from '../database';
-
 import { UserEntity } from '../lib/types/user.entity';
-import { PostgresError } from '../lib/types/pg-error';
 import { authBodyCheck } from '../validation/auth-body-validation';
 import { generateAccessToken } from '../lib/utilts/generate-jwt-token';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
@@ -22,21 +20,18 @@ router.post(
   async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
+    const [getUserByEmail] = await knex('user').select('id').where({ email: email });
+
+    if (getUserByEmail) {
+      res.status(409).send(`User with ${email} E-mail already exist`);
+      return;
+    }
+
     const hashPassword = await hash(password, Number(process.env.PASSWORD_SALT));
 
-    // TODO: Посмотри как было раньше и исправь
+    await knex('user').insert({ email: email, password: hashPassword }).returning('*');
 
-    try {
-      await knex<UserEntity>('user').insert({ email: email, password: hashPassword });
-
-      return res.status(201).send(`User with ${email} email was create successful!`);
-    } catch (error) {
-      const postgresErr = error as PostgresError;
-
-      if (postgresErr.code === '23505') {
-        return res.status(400).send(`User with ${email} email already exist`);
-      }
-    }
+    return res.status(201).send(`User with ${email} email was create successful!`);
   },
 );
 
