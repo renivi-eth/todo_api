@@ -20,7 +20,7 @@ router.post(
   async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
-    const [getUserByEmail] = await knex('user').select('id').where({ email: email });
+    const [getUserByEmail] = await knex('user').select('id').where({ email });
 
     if (getUserByEmail) {
       res.status(409).send(`User with ${email} E-mail already exist`);
@@ -46,20 +46,21 @@ router.post(
   async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
-    // TODO: Указывать явно .select('*');
-    const user = await knex<UserEntity>('user').where({ email }).first();
+    const checkUser = await knex<UserEntity>('user').select('*').where({ email }).first();
 
-    if (!user) {
-      return res.status(404).send(`User with ${email} not found`);
+    if (!checkUser) {
+      res.status(404).send(`User with ${email} not found`);
+      return;
     }
 
-    const isValidPassword = await compare(password, user.password);
+    const isValidPassword = await compare(password, checkUser.password);
 
     if (!isValidPassword) {
-      return res.status(400).send('Password is not correct');
+      res.status(400).send('Password is not correct');
+      return;
     }
 
-    const token = generateAccessToken(user.id, user.email);
+    const token = generateAccessToken(checkUser.id, checkUser.email);
     return res.status(200).json({ token });
   },
 );
