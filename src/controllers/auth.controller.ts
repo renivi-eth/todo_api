@@ -20,7 +20,7 @@ router.post(
   async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
-    const [getUserByEmail] = await knex('user').select('id').where({ email });
+    const [getUserByEmail] = await knex<UserEntity>('user').select('id').where({ email });
 
     if (getUserByEmail) {
       res.status(409).send(`User with ${email} E-mail already exist`);
@@ -29,7 +29,7 @@ router.post(
 
     const hashPassword = await hash(password, Number(process.env.PASSWORD_SALT));
 
-    await knex('user').insert({ email: email, password: hashPassword }).returning('*');
+    await knex<UserEntity>('user').insert({ email: email, password: hashPassword }).returning('*');
 
     return res.status(201).send(`User with ${email} email was create successful!`);
   },
