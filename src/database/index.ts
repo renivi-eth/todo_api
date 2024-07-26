@@ -19,14 +19,16 @@ export const knex = Knex({
   searchPath: ['knex', 'public'],
 });
 
-// TODO: Вернуть как было. Зачем нужен return, что будет лежать в res, в catch, нужно console.error
+/*
+Подключение к Базе Данных через Knex.js 
+При успешном завершении Promise 
+*/
+// TODO: не работает catch разобраться!
 knex
   .raw('SELECT NOW()')
-  .then((res: string) => {
-    console.log('PostgreSQL is running (on knex.js)');
-    return res;
+  .then(() => {
+    console.log('Connection with Postgres successful');
   })
-  .catch((err: Error) => {
-    console.log('Error to connection PostgreSQL');
-    return err;
+  .catch((err) => {
+    console.error('Error with connection PostgreSQL:', err);
   });
