@@ -1,5 +1,6 @@
-import { query, ValidationChain } from 'express-validator';
 import { TaskState } from '../lib/variables/task-state';
+import { query, ValidationChain } from 'express-validator';
+import { SortDirection } from '../lib/variables/sort-direction';
 /*
 naming - entityWhat_validate(param, body,query)Check
 Валидация параметров запроса (query params) в задаче 
@@ -7,9 +8,9 @@ naming - entityWhat_validate(param, body,query)Check
 export const taskQueryParamCheck: ValidationChain[] = [
   query('limit', 'Limit must be integer and positive').optional().isInt({ min: 1 }),
 
-  query('state', 'State must be "backlog", "in-progress" or "done"')
-    .optional()
-    .isIn([Object.values(TaskState)]),
+  query('state', 'State must be backlog, in-progress or done').optional().isIn(Object.values(TaskState)),
 
-  query('sort', 'Sort mut be created-at or name').optional().isIn(['created-at', 'name']),
+  query('sortProperty', 'sortProperty must be created_at or name').optional().isIn(['created_at', 'name']),
+
+  query('SortDirection', 'SortDirection must be ASC or DESC').optional().isIn(Object.values(SortDirection)),
 ];
