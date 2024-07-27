@@ -14,9 +14,6 @@ export const knex = Knex({
     password: process.env.POSTGRES_PASSWORD,
     database: process.env.POSTGRES_DB,
   },
-
-  // TODO: Что это, разобраться
-  searchPath: ['knex', 'public'],
 });
 
 /*
