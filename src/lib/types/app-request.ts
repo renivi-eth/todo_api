@@ -22,12 +22,10 @@ interface ParsedQs {
 Который ключом принимает строку, типом undefined, string, массив String, ParsedQS, массив ParsedQS (ParsedQS, массив ParsedQS - значения для ключа может быть другим объектом, т.е. мы может принимать объект или массив каких либо query param )
 
 Поэтому мы делаем ExtendedParsedQs extends ParsedQs и расширяем типы, иными словами если придет query parameters limit - значение должно быть строкой и т.д,
-
 Почему расширение типа не ругается, ведь мы передаем два тип enum, а interface ParsedQS не может принимать enum. Ответ: enum читаются как строки или числа 
 
 */
 
-// TODO:
 interface ExtendedParsedQs extends ParsedQs {
   limit?: string;
   state?: TaskState;
@@ -35,6 +33,7 @@ interface ExtendedParsedQs extends ParsedQs {
   SortDirection?: SortDirection;
 }
 
+// Типизация для req.params.id
 interface Params {
   id: string;
 }
