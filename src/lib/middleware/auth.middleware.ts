@@ -32,7 +32,6 @@ export const authMiddleware = (req: AppRequest, res: Response, next: NextFunctio
     }
 
     req.user = decodedData;
-
     next();
   } catch {
     return res.status(403).send('User is not authenticated');
