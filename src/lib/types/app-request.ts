@@ -36,6 +36,8 @@ interface ExtendedParsedQs extends ParsedQs {
 // Типизация для req.params.id
 interface Params {
   id: string;
+  taskId: string;
+  tagId: string;
 }
 
 // Переопределяем тип Request
