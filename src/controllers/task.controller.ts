@@ -5,8 +5,8 @@ import { knex } from '../database';
 import { AppRequest } from '../lib/types/app-request';
 import { TaskEntity } from '../lib/types/task.entity';
 
-import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { taskBodyCheck } from '../validation/task-body-validation';
+import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 import { taskQueryParamCheck } from '../validation/task-query-param-validation';
 import { taskTagParamIDCheck } from '../validation/taskTag-param-id-validation';
@@ -17,9 +17,9 @@ export const router = express.Router();
 router.get(
   '/tasks',
 
-  ...taskQueryParamCheck,
-
   authMiddleware,
+
+  ...taskQueryParamCheck,
 
   handleReqQueryError,
 
@@ -28,21 +28,22 @@ router.get(
       throw new Error('User not found');
     }
 
-    const query = knex<TaskEntity>('task').select('*').where({ user_id: req.user.id }).returning('*');
+    const taskQueryBuilder = knex<TaskEntity>('task').select('*').where({ user_id: req.user.id }).returning('*');
 
     if (req.query.limit) {
-      query.limit(Number(req.query.limit));
+      taskQueryBuilder.limit(Number(req.query.limit));
     }
     if (req.query.state) {
-      query.where({ state: req.query.state });
+      taskQueryBuilder.where({ state: req.query.state });
     }
     if (req.query.sortDirection && req.query.sortProperty) {
-      query.orderBy(String(req.query.sortProperty), String(req.query.sortDirection));
+      taskQueryBuilder.orderBy(String(req.query.sortProperty), String(req.query.sortDirection));
     }
 
-    const finalResWithParam = await query;
+    const tasks = await taskQueryBuilder;
 
-    res.status(200).send(finalResWithParam);
+    res.status(200).send(tasks);
+    return;
   },
 );
 
@@ -61,14 +62,16 @@ router.get(
       throw new Error('User not found');
     }
 
-    const task = await knex<TaskEntity>('task').where({ user_id: req.user.id, id: req.params.id }).first();
+    const taskQueryBuilderById = await knex<TaskEntity>('task')
+      .where({ user_id: req.user.id, id: req.params.id })
+      .first();
 
-    if (!task) {
+    if (!taskQueryBuilderById) {
       res.status(404).send(`Task by ${req.params.id} ID not found`);
       return;
     }
 
-    res.status(200).send(task);
+    res.status(200).send(taskQueryBuilderById);
     return;
   },
 );
@@ -90,7 +93,7 @@ router.post(
 
     const { name, description, state }: Partial<TaskEntity> = req.body;
 
-    const [task] = await knex<TaskEntity>('task')
+    const [taskQueryBuilderCreate] = await knex<TaskEntity>('task')
       .insert({
         name: name,
         description: description,
@@ -99,7 +102,7 @@ router.post(
       })
       .returning('*');
 
-    res.status(201).send(task);
+    res.status(201).send(taskQueryBuilderCreate);
     return;
   },
 );
@@ -122,7 +125,7 @@ router.put(
 
     const { name, description, state }: Partial<TaskEntity> = req.body;
 
-    const query = await knex<TaskEntity>('task')
+    const [taskQueryBuilderUpdate] = await knex<TaskEntity>('task')
       .where({ user_id: req.user.id, id: req.params.id })
       .update({
         name: name,
@@ -132,7 +135,7 @@ router.put(
       })
       .returning('*');
 
-    res.status(201).send(query);
+    res.status(201).send(taskQueryBuilderUpdate);
     return;
   },
 );
@@ -152,16 +155,16 @@ router.delete(
       throw new Error('User not found');
     }
 
-    const query = await knex<TaskEntity>('task')
+    const [taskQueryBuilderDelete] = await knex<TaskEntity>('task')
       .where({ id: req.params.id, user_id: req.user.id })
       .del()
       .returning('*');
 
-    if (!query) {
+    if (!taskQueryBuilderDelete) {
       res.status(404).send('Task not found or not authorized to delete this task');
       return;
     }
-    res.status(200).send(query);
+    res.status(200).send(taskQueryBuilderDelete);
     return;
   },
 );
