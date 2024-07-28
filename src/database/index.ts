@@ -18,14 +18,13 @@ export const knex = Knex({
 
 /*
 Подключение к Базе Данных через Knex.js 
-При успешном завершении Promise 
+При успешном завершении Promise log успешное подключение, при ошибки - log код ошибки (err.code)
 */
-// TODO: не работает catch разобраться!
 knex
   .raw('SELECT NOW()')
   .then(() => {
     console.log('Connection with Postgres successful');
   })
   .catch((err) => {
-    console.error('Error with connection PostgreSQL:', err);
+    console.error('Error with connection PostgreSQL:', err.code);
   });
