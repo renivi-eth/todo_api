@@ -1,4 +1,3 @@
-import { param } from 'express-validator';
 import express, { Response } from 'express';
 
 import { knex } from '../database';
@@ -8,7 +7,6 @@ import { AppRequest } from '../lib/types/app-request';
 import { tagBodyCheck } from '../validation/tag-body-validation';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
-
 import { taskTagParamIDCheck } from '../validation/taskTag-param-id-validation';
 
 export const router = express.Router();
@@ -24,14 +22,19 @@ router.get(
       throw new Error('User not found');
     }
 
-    const query = await knex<TagEntity>('tag').where({ user_id: req.user.id });
+    const tagsQueryBuilder = knex<TagEntity>('tag').where({ user_id: req.user.id }).returning('*');
 
-    if (query.length === 0) {
-      res.status(404).send('Tags not found or not authorized');
-      return;
+    if (req.query.limit) {
+      tagsQueryBuilder.limit(Number(req.query.limit));
     }
 
-    res.status(200).send(query);
+    if (req.query.sortDirection && req.query.sortProperty) {
+      tagsQueryBuilder.orderBy(String(req.query.sortProperty), String(req.query.sortDirection));
+    }
+
+    const tags = await tagsQueryBuilder;
+
+    res.status(200).send(tags);
     return;
   },
 );
@@ -51,14 +54,14 @@ router.get(
       throw new Error('User not found');
     }
 
-    const query = await knex<TagEntity>('tag').where({ id: req.params.id, user_id: req.user.id });
+    const [tagQueryBuilderById] = await knex<TagEntity>('tag').where({ id: req.params.id, user_id: req.user.id });
 
-    if (query.length === 0) {
+    if (!tagQueryBuilderById) {
       res.status(404).send(`Tags by ${req.params.id} id not found`);
       return;
     }
 
-    res.status(200).send(query);
+    res.status(200).send(tagQueryBuilderById);
     return;
   },
 );
@@ -77,10 +80,13 @@ router.post(
     if (!req.user) {
       throw new Error('User not found');
     }
+    const { name }: Partial<TagEntity> = req.body;
 
-    const [tag] = await knex<TagEntity>('tag').insert({ name: req.body.name, user_id: req.user.id }).returning('*');
+    const [tagQueryBuilderCreate] = await knex<TagEntity>('tag')
+      .insert({ name: name, user_id: req.user.id })
+      .returning('*');
 
-    res.status(201).send(tag);
+    res.status(201).send(tagQueryBuilderCreate);
     return;
   },
 );
@@ -101,13 +107,14 @@ router.put(
       throw new Error('User not found');
     }
 
-    const [query] = await knex<TagEntity>('tag')
+    const { name }: Partial<TagEntity> = req.body;
+
+    const [tagQueryBuilderUpdate] = await knex<TagEntity>('tag')
       .where({ id: req.params.id, user_id: req.user.id })
-      // TODO: Не обновляем updated_at
-      .update({ name: req.body.name })
+      .update({ name: name, updated_at: knex.fn.now() })
       .returning('*');
 
-    res.status(201).send(query);
+    res.status(201).send(tagQueryBuilderUpdate);
     return;
   },
 );
@@ -127,17 +134,17 @@ router.delete(
       throw new Error('User not found');
     }
 
-    const [query] = await knex<TagEntity>('tag')
+    const [tagQueryBuilderDelete] = await knex<TagEntity>('tag')
       .where({ id: req.params.id, user_id: req.user.id })
       .del()
       .returning('*');
 
-    if (!query) {
+    if (!tagQueryBuilderDelete) {
       res.status(404).send('Tag not found');
       return;
     }
 
-    res.status(200).send(query);
+    res.status(200).send(tagQueryBuilderDelete);
     return;
   },
 );
