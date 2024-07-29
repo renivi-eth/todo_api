@@ -32,23 +32,20 @@ CREATE TABLE tag
 CREATE TABLE task_tag
 (
     task_id UUID REFERENCES task (id) ON DELETE CASCADE,
-    tag_id  UUID REFERENCES tag (id)  ON DELETE CASCADE,
+    tag_id  UUID REFERENCES tag (id) ON DELETE CASCADE,
     PRIMARY KEY (task_id, tag_id)
 );
 
 -- Indexes
 
 -- Ускоряет поиск пользователей по email
-CREATE INDEX idx_user_email ON "user" (email);
+CREATE INDEX idx_user_email ON "user" USING hash (email);
 
--- Ускоряет выборки по task 
-CREATE INDEX idx_task_user_id ON task (user_id);
+-- Ускоряет выборки по task
 CREATE INDEX idx_task_state ON task (state);
-CREATE INDEX idx_task_name ON task (name);
 
 -- Ускоряет выборки по tag 
-CREATE INDEX idx_tag_user_id ON tag (user_id);
-CREATE INDEX idx_tag_name ON tag (name);
+CREATE INDEX idx_tag_user_id ON tag USING hash (user_id);
 
 -- Ускоряет выборку по task_tag 
-CREATE INDEX idx_task_tag_tag_id ON task_tag (tag_id);
+CREATE INDEX idx_task_tag_tag_id ON task_tag USING hash (tag_id);
