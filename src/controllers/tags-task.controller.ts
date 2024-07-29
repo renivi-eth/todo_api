@@ -1,17 +1,16 @@
-import { param } from 'express-validator';
 import express, { Response } from 'express';
+import { param } from 'express-validator';
 
 import { knex } from '../database';
 
-import { TagEntity } from '../lib/types/tag.entity';
-import { AppRequest } from '../lib/types/app-request';
-import { TaskEntity } from '../lib/types/task.entity';
-import { TaskTagEntity } from '../lib/types/task-tag.entity';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
+import { AppRequest } from '../lib/types/app-request';
+import { TagEntity } from '../lib/types/tag.entity';
+import { TaskTagEntity } from '../lib/types/task-tag.entity';
+import { TaskEntity } from '../lib/types/task.entity';
 
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 import { taskTagIdCheck } from '../validation/taskTagRelation-param-validation';
-import { taskTagParamIDCheck } from '../validation/taskTag-param-id-validation';
 
 export const router = express.Router();
 
