@@ -112,8 +112,6 @@ router.delete(
       throw new Error('User not found');
     }
 
-    // TODO: Пользователь может удалять только свои связи
-
     // Проверка, что задача и тэг принадлежат юзеру (через user_id)
     const [checkTaskById] = await knex<TaskEntity>('task')
       .select('id')
