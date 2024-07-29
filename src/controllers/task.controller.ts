@@ -10,8 +10,21 @@ import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 import { taskQueryParamCheck } from '../validation/task-query-param-validation';
 import { taskTagParamIDCheck } from '../validation/taskTag-param-id-validation';
+import { TaskState } from '../lib/variables/task-state';
+import { SortDirection } from '../lib/variables/sort-direction';
 
 export const router = express.Router();
+
+type TaskQueryParams = {
+  limit?: string;
+  state?: TaskState;
+  sortProperty?: string;
+  sortDirection?: SortDirection;
+};
+
+// TODO:
+//  1. Поправить все типы, использовать новый AppRequest
+//  2. Использовать везде checkPathUUID
 
 // Получить все задачи
 router.get(
@@ -23,7 +36,7 @@ router.get(
 
   handleReqQueryError,
 
-  async (req: AppRequest, res: Response) => {
+  async (req: AppRequest<TaskQueryParams>, res: Response) => {
     if (!req.user) {
       throw new Error('User not found');
     }
@@ -33,11 +46,13 @@ router.get(
     if (req.query.limit) {
       taskQueryBuilder.limit(Number(req.query.limit));
     }
+
     if (req.query.state) {
       taskQueryBuilder.where({ state: req.query.state });
     }
-    if (req.query.sortDirection && req.query.sortProperty) {
-      taskQueryBuilder.orderBy(String(req.query.sortProperty), String(req.query.sortDirection));
+
+    if (req.query.sortProperty) {
+      taskQueryBuilder.orderBy(String(req.query.sortProperty), String(req.query.sortDirection ?? SortDirection.ASC));
     }
 
     const tasks = await taskQueryBuilder;
@@ -62,16 +77,14 @@ router.get(
       throw new Error('User not found');
     }
 
-    const taskQueryBuilderById = await knex<TaskEntity>('task')
-      .where({ user_id: req.user.id, id: req.params.id })
-      .first();
+    const task = await knex<TaskEntity>('task').where({ user_id: req.user.id, id: req.params.id }).first();
 
-    if (!taskQueryBuilderById) {
+    if (!task) {
       res.status(404).send(`Task by ${req.params.id} ID not found`);
       return;
     }
 
-    res.status(200).send(taskQueryBuilderById);
+    res.status(200).send(task);
     return;
   },
 );
@@ -164,6 +177,7 @@ router.delete(
       res.status(404).send('Task not found or not authorized to delete this task');
       return;
     }
+
     res.status(200).send(taskQueryBuilderDelete);
     return;
   },

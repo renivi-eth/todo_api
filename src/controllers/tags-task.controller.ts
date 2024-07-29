@@ -14,13 +14,24 @@ import { taskTagIdCheck } from '../validation/taskTagRelation-param-validation';
 
 export const router = express.Router();
 
+const handleTaskTagError = (err: any) => {
+  console.error(err);
+  return [null];
+};
+
+/**
+ * Проверка, что параметр в пути является UUID
+ */
+const checkPathUUID = (field: string) => param(field, `${field} must be UUID`).isUUID();
+
 // Связать задачу с тэгом:
 router.post(
   '/tags/:tagId/task/:taskId',
 
   authMiddleware,
 
-  ...taskTagIdCheck,
+  checkPathUUID('tagId'),
+  checkPathUUID('taskId'),
 
   handleReqQueryError,
 
@@ -30,33 +41,40 @@ router.post(
     }
 
     // Проверка, что задача и тэг принадлежат юзеру (через user_id)
-    const [checkTaskById] = await knex<TaskEntity>('task')
+    const taskQuery = knex<TaskEntity>('task')
       .select('id')
       .where({ id: req.params.taskId, user_id: req.user.id })
       .returning('id');
 
-    const [checkTagByID] = await knex<TagEntity>('tag')
+    const tagQuery = knex<TagEntity>('tag')
       .select('id')
       .where({ id: req.params.tagId, user_id: req.user.id })
       .returning('id');
 
-    if (!checkTaskById || !checkTagByID) {
-      res.status(400).send('Task or Tag not found');
+    const [checkTaskById, checkTagById] = await Promise.all([taskQuery, tagQuery]);
+
+    if (!checkTaskById) {
+      res.status(400).send('Task not found');
+      return;
+    }
+
+    if (!checkTagById) {
+      res.status(400).send('Tag not found');
       return;
     }
 
     // Проверка наличия такой связи в БД
-    const [checkRelations] = await knex<TaskTagEntity>('task_tag')
-      .where({
-        task_id: req.params.taskId,
-        tag_id: req.params.tagId,
-      })
-      .returning('*');
+    // const [checkRelations] = await knex<TaskTagEntity>('task_tag')
+    //   .where({
+    //     task_id: req.params.taskId,
+    //     tag_id: req.params.tagId,
+    //   })
+    //   .returning('*')
 
-    if (checkRelations) {
-      res.status(400).send('Relation between Task and Tag already exist!');
-      return;
-    }
+    // if (checkRelations) {
+    //   res.status(400).send('Relation between Task and Tag already exist!');
+    //   return;
+    // }
 
     // Если задача / тэг принадлежат пользователю И (!) такой связи еще нет, создаем связь
     const [createRelations] = await knex<TaskTagEntity>('task_tag')
@@ -64,7 +82,12 @@ router.post(
         task_id: req.params.taskId,
         tag_id: req.params.tagId,
       })
-      .returning('*');
+      .returning('*')
+      .catch(handleTaskTagError);
+
+    if (!createRelations) {
+      res.status(500).send('Something went wrong!');
+    }
 
     res.status(201).send(createRelations);
     return;
@@ -77,7 +100,7 @@ router.get(
 
   authMiddleware,
 
-  param('taskId', 'taskId must be UUID').isUUID(),
+  checkPathUUID('taskId'),
 
   handleReqQueryError,
 
@@ -86,8 +109,8 @@ router.get(
       throw new Error('User not found');
     }
 
-    const allTagsQueryBuilder = await knex<TagEntity>('task_tag')
-      .join('tag', 'task_tag.tag_id', '=', 'tag.id')
+    const allTagsQueryBuilder = await knex<TaskTagEntity>('task_tag')
+      .join<TagEntity>('tag', 'task_tag.tag_id', '=', 'tag.id')
       .select('name')
       .where({ task_id: req.params.taskId, user_id: req.user.id });
 
@@ -98,11 +121,12 @@ router.get(
 
 // Удалить связь задачи с тэгом:
 router.delete(
-  '/tags/:taskId/:tagId',
+  '/tags/:tagId/task/:taskId',
 
   authMiddleware,
 
-  taskTagIdCheck,
+  checkPathUUID('tagId'),
+  checkPathUUID('taskId'),
 
   handleReqQueryError,
 
@@ -123,12 +147,7 @@ router.delete(
       .returning('id');
 
     if (!checkTaskById || !checkTagByID) {
-      res.status(400).send('Task or Tag not found');
-      return;
-    }
-
-    if (!checkTaskById || !checkTagByID) {
-      res.status(400).send('Task or Tag not found');
+      res.status(404).send('Task or Tag not found');
       return;
     }
 
@@ -141,7 +160,7 @@ router.delete(
       .returning('*');
 
     if (!deleteRelationsByID) {
-      res.status(400).send('Relation already delete!');
+      res.status(404).send('Relation not found!');
       return;
     }
 

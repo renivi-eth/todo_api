@@ -12,5 +12,5 @@ export const taskQueryParamCheck: ValidationChain[] = [
 
   query('sortProperty', 'sortProperty must be created_at or name').optional().isIn(['created_at', 'name']),
 
-  query('SortDirection', 'SortDirection must be ASC or DESC').optional().isIn(Object.values(SortDirection)),
+  query('sortDirection', 'sortDirection must be ASC or DESC').optional().isIn(Object.values(SortDirection)),
 ];
