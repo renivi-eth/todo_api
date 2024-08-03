@@ -6,8 +6,9 @@ import { TagEntity } from '../lib/types/tag.entity';
 import { AppRequest } from '../lib/types/app-request';
 import { tagBodyCheck } from '../validation/tag-body-validation';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
+import { checkPathUUID } from '../validation/uuid-check-validation';
+import { TagsQueryParams } from '../lib/types/tags-query-param.entity';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
-import { taskTagParamIDCheck } from '../validation/taskTag-param-id-validation';
 
 export const router = express.Router();
 
@@ -17,7 +18,7 @@ router.get(
 
   authMiddleware,
 
-  async (req: AppRequest, res: Response) => {
+  async (req: AppRequest<TagsQueryParams>, res: Response) => {
     if (!req.user) {
       throw new Error('User not found');
     }
@@ -45,11 +46,11 @@ router.get(
 
   authMiddleware,
 
-  taskTagParamIDCheck,
+  checkPathUUID('id'),
 
   handleReqQueryError,
 
-  async (req: AppRequest, res: Response) => {
+  async (req: AppRequest<{}, { id: string }>, res: Response) => {
     if (!req.user) {
       throw new Error('User not found');
     }
@@ -97,12 +98,12 @@ router.put(
 
   authMiddleware,
 
-  taskTagParamIDCheck,
+  checkPathUUID('id'),
   tagBodyCheck,
 
   handleReqQueryError,
 
-  async (req: AppRequest, res: Response) => {
+  async (req: AppRequest<{}, { id: string }>, res: Response) => {
     if (!req.user) {
       throw new Error('User not found');
     }
@@ -125,11 +126,11 @@ router.delete(
 
   authMiddleware,
 
-  taskTagParamIDCheck,
+  checkPathUUID('id'),
 
   handleReqQueryError,
 
-  async (req: AppRequest, res: Response) => {
+  async (req: AppRequest<{}, { id: string }>, res: Response) => {
     if (!req.user) {
       throw new Error('User not found');
     }

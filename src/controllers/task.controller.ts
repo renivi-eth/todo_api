@@ -5,22 +5,16 @@ import { knex } from '../database';
 import { AppRequest } from '../lib/types/app-request';
 import { TaskEntity } from '../lib/types/task.entity';
 
-import { taskBodyCheck } from '../validation/task-body-validation';
 import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
-import { taskQueryParamCheck } from '../validation/task-query-param-validation';
-import { taskTagParamIDCheck } from '../validation/taskTag-param-id-validation';
-import { TaskState } from '../lib/variables/task-state';
+import { TaskQueryParams } from '../lib/types/task-query-param.entity';
 import { SortDirection } from '../lib/variables/sort-direction';
+import { taskBodyCheck } from '../validation/task-body-validation';
+import { taskQueryParamCheck } from '../validation/task-query-param-validation';
+
+import { checkPathUUID } from '../validation/uuid-check-validation';
 
 export const router = express.Router();
-
-type TaskQueryParams = {
-  limit?: string;
-  state?: TaskState;
-  sortProperty?: string;
-  sortDirection?: SortDirection;
-};
 
 // TODO:
 //  1. Поправить все типы, использовать новый AppRequest
@@ -68,11 +62,11 @@ router.get(
 
   authMiddleware,
 
-  taskTagParamIDCheck,
+  checkPathUUID('id'),
 
   handleReqQueryError,
 
-  async (req: AppRequest, res: Response) => {
+  async (req: AppRequest<{}, { id: string }>, res: Response) => {
     if (!req.user) {
       throw new Error('User not found');
     }
@@ -126,12 +120,12 @@ router.put(
 
   authMiddleware,
 
-  taskTagParamIDCheck,
+  checkPathUUID('id'),
   ...taskBodyCheck,
 
   handleReqQueryError,
 
-  async (req: AppRequest, res: Response) => {
+  async (req: AppRequest<{}, { id: string }>, res: Response) => {
     if (!req.user) {
       throw new Error('User not found');
     }
@@ -159,11 +153,11 @@ router.delete(
 
   authMiddleware,
 
-  taskTagParamIDCheck,
+  checkPathUUID('id'),
 
   handleReqQueryError,
 
-  async (req: AppRequest, res: Response) => {
+  async (req: AppRequest<{}, { id: string }>, res: Response) => {
     if (!req.user) {
       throw new Error('User not found');
     }
