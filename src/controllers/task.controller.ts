@@ -5,11 +5,11 @@ import { knex } from '../database';
 import { AppRequest } from '../lib/types/app-request';
 import { TaskEntity } from '../lib/types/task.entity';
 
-import { authMiddleware } from '../lib/middleware/auth.middleware';
-import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
-import { TaskQueryParams } from '../lib/types/task-query-param.entity';
 import { SortDirection } from '../lib/variables/sort-direction';
+import { authMiddleware } from '../lib/middleware/auth.middleware';
 import { taskBodyCheck } from '../validation/task-body-validation';
+import { TaskQueryParams } from '../lib/types/task-query-param.entity';
+import { handleReqQueryError } from '../lib/middleware/handle-err.middleware';
 import { taskQueryParamCheck } from '../validation/task-query-param-validation';
 
 import { checkPathUUID } from '../validation/uuid-check-validation';
