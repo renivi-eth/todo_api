@@ -3,7 +3,7 @@ import Knex from 'knex';
 
 dotenv.config();
 
-// Создание экземпляра подключения к PostgreSQL с помощью knex.js
+// Создание экземпляра подключения к PostgreSQL с помощью Knex.js
 export const knex = Knex({
   client: 'pg',
 
